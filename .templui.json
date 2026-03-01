@@ -1,0 +1,7 @@
+{
+  "componentsDir": "views/components",
+  "utilsDir": "views/utils",
+  "moduleName": "github.com/brian-nunez/go-echo-starter-template",
+  "jsDir": "assets/js/templui",
+  "jsPublicPath": "/assets/js/templui"
+}
