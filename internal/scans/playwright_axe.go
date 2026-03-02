@@ -1,6 +1,7 @@
 package scans
 
 import (
+	_ "embed"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -12,7 +13,8 @@ import (
 	"github.com/playwright-community/playwright-go"
 )
 
-const axeCoreCDNURL = "https://cdn.jsdelivr.net/npm/axe-core@4.10.3/axe.min.js"
+//go:embed axe.min.js
+var axeCoreLocalSource string
 
 type axeNode struct {
 	HTML           string   `json:"html"`
@@ -39,17 +41,49 @@ type AxeAuditResult struct {
 	RawJSON  string
 }
 
+func preparePageForAxe(page playwright.Page) error {
+	runtimeGuardScript := `(() => {
+		try {
+			const nativeEval = globalThis.eval;
+			const nativeFunction = globalThis.Function;
+			Object.defineProperty(globalThis, "eval", {
+				configurable: false,
+				enumerable: false,
+				get() { return nativeEval; },
+				set(_) { return true; }
+			});
+			Object.defineProperty(globalThis, "Function", {
+				configurable: false,
+				enumerable: false,
+				get() { return nativeFunction; },
+				set(_) { return true; }
+			});
+		} catch (_) {
+			// Ignore - some pages may lock these globals.
+		}
+	})();`
+
+	if err := page.AddInitScript(playwright.Script{Content: playwright.String(runtimeGuardScript)}); err != nil {
+		return fmt.Errorf("configure runtime guard script: %w", err)
+	}
+
+	axeSource := strings.TrimSpace(axeCoreLocalSource)
+	if axeSource == "" {
+		return fmt.Errorf("local axe-core source is empty")
+	}
+
+	if err := page.AddInitScript(playwright.Script{Content: playwright.String(axeSource)}); err != nil {
+		return fmt.Errorf("inject local axe-core source: %w", err)
+	}
+
+	return nil
+}
+
 func installPlaywrightDriver() error {
 	return playwright.Install(&playwright.RunOptions{SkipInstallBrowsers: true})
 }
 
 func runAxeAudit(page playwright.Page, standard string, includeBestPractices bool) (AxeAuditResult, error) {
-	if _, err := page.AddScriptTag(playwright.PageAddScriptTagOptions{
-		URL: playwright.String(axeCoreCDNURL),
-	}); err != nil {
-		return AxeAuditResult{}, fmt.Errorf("inject axe-core: %w", err)
-	}
-
 	rawResult, err := page.Evaluate(`async (params) => {
 		if (typeof axe === "undefined") {
 			throw new Error("axe-core not available on page");

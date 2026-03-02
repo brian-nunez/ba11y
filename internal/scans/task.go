@@ -88,6 +88,10 @@ func (t *scanTask) Process(ctx context.Context, pc *worker.ProcessContext) error
 		t.service.failScan(t.scanID, "Could not create browser page")
 		return fmt.Errorf("create page: %w", err)
 	}
+	if err := preparePageForAxe(page); err != nil {
+		t.service.failScan(t.scanID, "Could not configure scan runtime")
+		return fmt.Errorf("prepare page for axe: %w", err)
+	}
 
 	if err := setViewportForDevice(page, scan.DeviceEmulation); err != nil {
 		t.service.failScan(t.scanID, "Could not set browser viewport")
