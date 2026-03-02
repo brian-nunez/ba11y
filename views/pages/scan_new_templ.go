@@ -160,7 +160,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(form.Target)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 53, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 50, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -178,7 +178,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(standard)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 62, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 58, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -201,7 +201,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(standard)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 62, Col: 90}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 58, Col: 90}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -222,7 +222,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "> <span class=\"text-sm text-slate-600 group-hover:text-slate-900\">Include best-practice rules</span></label></div></div></div><div class=\"mt-8 flex items-center justify-between px-4\"><a href=\"/\" class=\"px-6 py-3 font-bold text-slate-600 hover:text-slate-900\">Cancel</a><div class=\"flex gap-4\"><button type=\"button\" class=\"flex items-center gap-2 rounded-lg bg-slate-200 px-6 py-3 font-bold text-slate-700 hover:bg-slate-300\"><span class=\"material-symbols-outlined\">save</span> Save Draft</button> <button type=\"submit\" class=\"flex items-center gap-2 rounded-lg bg-[#137fec] px-10 py-3 font-bold text-white shadow-lg shadow-[#137fec]/20 hover:bg-[#0f72d6]\">Run Scan <span class=\"material-symbols-outlined\">rocket_launch</span></button></div></div></form></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "> <span class=\"text-sm text-slate-600 group-hover:text-slate-900\">Include best-practice rules</span></label></div></div></div><div class=\"mt-8 flex items-center justify-between px-4\"><a href=\"/\" class=\"px-6 py-3 font-bold text-slate-600 hover:text-slate-900\">Cancel</a><div class=\"flex gap-4\"><button type=\"submit\" class=\"flex items-center gap-2 rounded-lg bg-[#137fec] px-10 py-3 font-bold text-white shadow-lg shadow-[#137fec]/20 hover:bg-[#0f72d6]\">Run Scan <span class=\"material-symbols-outlined\">rocket_launch</span></button></div></div></form></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
