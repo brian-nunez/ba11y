@@ -97,20 +97,20 @@ func FormattedScanTime(createdAt time.Time) string {
 }
 
 func RiskLabel(summary scans.Summary) string {
-	if summary.Critical >= 8 {
+	if summary.Critical >= 3 {
 		return "High Risk"
 	}
-	if summary.Critical >= 3 || summary.Serious >= 8 {
+	if summary.Critical >= 1 || summary.Serious >= 8 {
 		return "Medium Risk"
 	}
 	return "Low Risk"
 }
 
 func RiskClass(summary scans.Summary) string {
-	if summary.Critical >= 8 {
+	if summary.Critical >= 3 {
 		return "bg-red-100 text-red-600"
 	}
-	if summary.Critical >= 3 || summary.Serious >= 8 {
+	if summary.Critical >= 1 || summary.Serious >= 8 {
 		return "bg-orange-100 text-orange-600"
 	}
 	return "bg-emerald-100 text-emerald-600"

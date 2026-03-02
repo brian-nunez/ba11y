@@ -1,7 +1,7 @@
 package pages
 
 templ Home(session SessionView) {
-	@Layout("AllyPortal - Digital Accessibility Self-Service") {
+	@Layout("A11yPortal - Digital Accessibility Self-Service") {
 		<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
 			<div class="layout-container flex h-full grow flex-col">
 				<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-slate-200 bg-[#f6f7f8]/80 px-6 py-4 backdrop-blur-md md:px-20">
@@ -9,14 +9,12 @@ templ Home(session SessionView) {
 						<div class="size-8 rounded-lg bg-[#137fec] text-white flex items-center justify-center">
 							<span class="material-symbols-outlined text-2xl">accessibility</span>
 						</div>
-						<h2 class="text-xl font-bold tracking-tight">AllyPortal</h2>
+						<h2 class="text-xl font-bold tracking-tight">A11yPortal</h2>
 					</div>
 					<div class="flex flex-1 items-center justify-end gap-8">
 						<nav class="hidden lg:flex items-center gap-8">
 							<a class="text-sm font-medium text-slate-600 hover:text-[#137fec]" href="/scans/new">Scans</a>
 							<a class="text-sm font-medium text-slate-600 hover:text-[#137fec]" href="/scans">Reports</a>
-							<a class="text-sm font-medium text-slate-600 hover:text-[#137fec]" href="#">Documentation</a>
-							<a class="text-sm font-medium text-slate-600 hover:text-[#137fec]" href="#">Pricing</a>
 						</nav>
 						<div class="flex items-center gap-4">
 							if session.Authenticated {
@@ -53,7 +51,6 @@ templ Home(session SessionView) {
 							</div>
 						</div>
 					</section>
-
 					<section class="bg-slate-100 px-6 py-16 md:px-20">
 						<div class="mx-auto max-w-7xl">
 							<h2 class="mb-10 text-3xl font-bold tracking-tight">Comprehensive Scanning Capabilities</h2>
@@ -75,11 +72,10 @@ templ Home(session SessionView) {
 							</div>
 						</div>
 					</section>
-
 					<section class="mx-auto w-full max-w-7xl px-6 py-20 md:px-20">
 						<div class="flex flex-col gap-12">
 							<div class="flex flex-col items-center gap-4 text-center">
-								<h2 class="text-4xl font-bold tracking-tight">Why Choose AllyPortal?</h2>
+								<h2 class="text-4xl font-bold tracking-tight">Why Choose A11yPortal?</h2>
 								<p class="max-w-2xl text-lg text-slate-600">Built for developers, designers, and compliance officers to collaborate and create inclusive digital experiences.</p>
 							</div>
 							<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -106,14 +102,14 @@ templ Home(session SessionView) {
 					<div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 md:flex-row">
 						<div class="flex items-center gap-3 text-[#137fec]">
 							<span class="material-symbols-outlined text-xl">accessibility</span>
-							<span class="font-bold text-slate-900">AllyPortal</span>
+							<span class="font-bold text-slate-900">A11yPortal</span>
 						</div>
 						<div class="flex gap-8 text-sm text-slate-500">
-							<a class="hover:text-[#137fec]" href="#">Privacy Policy</a>
-							<a class="hover:text-[#137fec]" href="#">Terms of Service</a>
-							<a class="hover:text-[#137fec]" href="#">Contact Support</a>
+							// <a class="hover:text-[#137fec]" href="#">Privacy Policy</a>
+							// <a class="hover:text-[#137fec]" href="#">Terms of Service</a>
+							// <a class="hover:text-[#137fec]" href="#">Contact Support</a>
 						</div>
-						<div class="text-sm text-slate-500">© 2026 AllyPortal. All rights reserved.</div>
+						<div class="text-sm text-slate-500">© 2026 A11yPortal. All rights reserved.</div>
 					</div>
 				</footer>
 			</div>

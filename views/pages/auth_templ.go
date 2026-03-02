@@ -161,7 +161,7 @@ func AuthPage(title string, action string, submitLabel string, secondaryText str
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Layout("AllyPortal - "+title).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Layout("A11yPortal - "+title).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

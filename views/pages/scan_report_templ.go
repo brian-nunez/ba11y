@@ -97,7 +97,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(RiskLabel(scan.Summary))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 28, Col: 143}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 27, Col: 143}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -110,7 +110,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Target)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 33, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 32, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -123,7 +123,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(FormattedScanTime(scan.CreatedAt))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 37, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 36, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -136,7 +136,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(scan.DeviceEmulation)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 41, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 40, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -149,7 +149,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(currentUser.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 45, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 44, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -162,7 +162,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Total))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 64, Col: 113}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 62, Col: 113}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -175,7 +175,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Critical))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 68, Col: 129}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 66, Col: 129}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -188,7 +188,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Serious))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 72, Col: 131}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 70, Col: 131}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -201,7 +201,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Moderate))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 76, Col: 131}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 74, Col: 131}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -214,7 +214,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.DesktopImageURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 98, Col: 143}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 95, Col: 143}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -227,7 +227,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.TabletImageURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 105, Col: 141}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 102, Col: 141}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -240,7 +240,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.MobileImageURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 112, Col: 141}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 109, Col: 141}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -253,7 +253,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.RecordingImageURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 126, Col: 118}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 122, Col: 118}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -266,7 +266,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(scan.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 133, Col: 149}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 129, Col: 149}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -279,7 +279,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Standard)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 141, Col: 163}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 136, Col: 163}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -292,7 +292,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Total))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 145, Col: 121}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 140, Col: 121}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -310,7 +310,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 165, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 159, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -323,7 +323,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 				var templ_7745c5c3_Var23 string
 				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 166, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 160, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 				if templ_7745c5c3_Err != nil {
@@ -336,7 +336,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Snippet)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 167, Col: 168}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 161, Col: 168}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -371,7 +371,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(SeverityLabel(finding.Severity))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 171, Col: 177}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 165, Col: 177}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -384,7 +384,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 				var templ_7745c5c3_Var28 string
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Standard)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 175, Col: 80}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 169, Col: 80}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 				if templ_7745c5c3_Err != nil {
@@ -397,7 +397,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 				var templ_7745c5c3_Var29 string
 				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Criterion)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 176, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 170, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 				if templ_7745c5c3_Err != nil {
@@ -410,7 +410,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(MethodLabel(finding.Method))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 180, Col: 177}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 174, Col: 177}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 				if templ_7745c5c3_Err != nil {
@@ -428,7 +428,7 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(len(scan.Findings)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 191, Col: 86}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 185, Col: 86}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {
@@ -441,13 +441,13 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Total))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 191, Col: 124}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 185, Col: 124}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, " results</span><div class=\"flex gap-2\"><button class=\"cursor-not-allowed rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm text-slate-400\">Previous</button> <button class=\"rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm font-medium hover:border-[#137fec]\">1</button> <button class=\"rounded-lg bg-[#137fec] px-3 py-1 text-sm font-medium text-white\">2</button> <button class=\"rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm font-medium hover:border-[#137fec]\">3</button> <button class=\"rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm font-medium hover:border-[#137fec]\">Next</button></div></div></div></main><footer class=\"mt-auto border-t border-slate-200 bg-white py-10\"><div class=\"mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 md:flex-row md:px-8\"><div class=\"flex items-center gap-2 text-slate-400\"><span class=\"material-symbols-outlined text-[20px]\">visibility</span> <span class=\"text-sm\">© 2026 A11y Scanner Enterprise</span></div><div class=\"flex gap-8 text-sm text-slate-500\"><a class=\"hover:text-[#137fec]\" href=\"#\">Terms of Service</a> <a class=\"hover:text-[#137fec]\" href=\"#\">Privacy Policy</a> <a class=\"hover:text-[#137fec]\" href=\"#\">API Docs</a> <a class=\"hover:text-[#137fec]\" href=\"#\">Support</a></div></div></footer></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, " results</span><div class=\"flex gap-2\"><button class=\"cursor-not-allowed rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm text-slate-400\">Previous</button> <button class=\"rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm font-medium hover:border-[#137fec]\">1</button> <button class=\"rounded-lg bg-[#137fec] px-3 py-1 text-sm font-medium text-white\">2</button> <button class=\"rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm font-medium hover:border-[#137fec]\">3</button> <button class=\"rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm font-medium hover:border-[#137fec]\">Next</button></div></div></div></main><footer class=\"mt-auto border-t border-slate-200 bg-white py-10\"><div class=\"mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 md:flex-row md:px-8\"><div class=\"flex items-center gap-2 text-slate-400\"><span class=\"material-symbols-outlined text-[20px]\">visibility</span> <span class=\"text-sm\">© 2026 A11y Scanner Enterprise</span></div><div class=\"flex gap-8 text-sm text-slate-500\"></div></div></footer></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
