@@ -11,6 +11,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/playwright-community/playwright-go v0.5700.1
 	golang.org/x/crypto v0.38.0
+	modernc.org/sqlite v1.37.0
 )
 
 require (
@@ -34,5 +35,4 @@ require (
 	modernc.org/libc v1.62.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.9.1 // indirect
-	modernc.org/sqlite v1.37.0 // indirect
 )

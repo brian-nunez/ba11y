@@ -3,6 +3,7 @@ package scans
 import (
 	"context"
 	"crypto/rand"
+	"database/sql"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -38,6 +39,7 @@ type Service struct {
 	scansByID      map[string]*Scan
 	orderedScanIDs []string
 
+	db         *sql.DB
 	authorizer *authorization.ScanAuthorizer
 	bbaas      *bbaas.Client
 	apiToken   string
@@ -45,7 +47,11 @@ type Service struct {
 	now        func() time.Time
 }
 
-func NewService(config Config, authorizer *authorization.ScanAuthorizer) (*Service, error) {
+func NewService(config Config, authorizer *authorization.ScanAuthorizer, db *sql.DB) (*Service, error) {
+	if db == nil {
+		return nil, fmt.Errorf("scan database is nil")
+	}
+
 	_ = os.Setenv("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")
 	if err := installPlaywrightDriver(); err != nil {
 		return nil, fmt.Errorf("install playwright driver: %w", err)
@@ -61,6 +67,24 @@ func NewService(config Config, authorizer *authorization.ScanAuthorizer) (*Servi
 		return nil, fmt.Errorf("create bbaas client: %w", err)
 	}
 
+	service := &Service{
+		scansByID:      make(map[string]*Scan),
+		orderedScanIDs: make([]string, 0),
+		db:             db,
+		authorizer:     authorizer,
+		bbaas:          client,
+		apiToken:       strings.TrimSpace(config.BBAASAPIToken),
+		now:            time.Now,
+	}
+
+	if err := service.ensureSchema(context.Background()); err != nil {
+		return nil, fmt.Errorf("ensure scan schema: %w", err)
+	}
+
+	if err := service.loadScans(context.Background()); err != nil {
+		return nil, fmt.Errorf("load scans from sqlite: %w", err)
+	}
+
 	concurrency := config.WorkerConcurrency
 	if concurrency <= 0 {
 		concurrency = 3
@@ -73,7 +97,7 @@ func NewService(config Config, authorizer *authorization.ScanAuthorizer) (*Servi
 
 	databasePath := strings.TrimSpace(config.WorkerDatabasePath)
 	if databasePath == "" {
-		databasePath = "./data/tasks.db"
+		databasePath = "./data/ba11y.db"
 	}
 
 	pool := worker.NewWorkerPool(worker.WorkerPoolConfig{
@@ -84,16 +108,9 @@ func NewService(config Config, authorizer *authorization.ScanAuthorizer) (*Servi
 	if err := pool.Start(); err != nil {
 		return nil, fmt.Errorf("start worker pool: %w", err)
 	}
+	service.workerPool = pool
 
-	return &Service{
-		scansByID:      make(map[string]*Scan),
-		orderedScanIDs: make([]string, 0),
-		authorizer:     authorizer,
-		bbaas:          client,
-		apiToken:       strings.TrimSpace(config.BBAASAPIToken),
-		workerPool:     pool,
-		now:            time.Now,
-	}, nil
+	return service, nil
 }
 
 func (s *Service) Shutdown() {
@@ -157,6 +174,12 @@ func (s *Service) CreateScan(ctx context.Context, actor auth.User, input CreateS
 	s.mu.Lock()
 	s.scansByID[scan.ID] = scan
 	s.orderedScanIDs = append([]string{scan.ID}, s.orderedScanIDs...)
+	if err := s.persistScanLocked(scan); err != nil {
+		delete(s.scansByID, scan.ID)
+		s.orderedScanIDs = removeScanID(s.orderedScanIDs, scan.ID)
+		s.mu.Unlock()
+		return Scan{}, fmt.Errorf("persist new scan: %w", err)
+	}
 	s.mu.Unlock()
 
 	taskInfo, err := s.workerPool.AddTask(&scanTask{service: s, scanID: scan.ID})
@@ -166,11 +189,19 @@ func (s *Service) CreateScan(ctx context.Context, actor auth.User, input CreateS
 	}
 
 	s.mu.Lock()
-	scan.TaskProcessID = taskInfo.ProcessID
-	scan.WorkerStatus = taskInfo.Status
+	stored := s.scansByID[scan.ID]
+	if stored != nil {
+		stored.TaskProcessID = taskInfo.ProcessID
+		stored.WorkerStatus = taskInfo.Status
+		if err := s.persistScanLocked(stored); err != nil {
+			s.mu.Unlock()
+			return Scan{}, fmt.Errorf("persist scan task metadata: %w", err)
+		}
+	}
+	out := s.cloneScan(stored)
 	s.mu.Unlock()
 
-	return s.cloneScan(scan), nil
+	return out, nil
 }
 
 func (s *Service) ListScansForUser(_ context.Context, actor auth.User) ([]Scan, error) {
@@ -237,6 +268,10 @@ func (s *Service) CancelScan(_ context.Context, actor auth.User, scanID string) 
 	scan.Stage = "Scan canceled"
 	scan.ErrorMessage = "Canceled by user"
 	scan.FinishedAt = &now
+	if err := s.persistScanLocked(scan); err != nil {
+		s.mu.Unlock()
+		return fmt.Errorf("persist canceled scan: %w", err)
+	}
 	browserID := scan.BrowserID
 	s.mu.Unlock()
 
@@ -264,7 +299,7 @@ func (s *Service) StatusForUser(ctx context.Context, actor auth.User, scanID str
 		EstimatedSeconds: estimateSecondsRemaining(scan.Status, scan.Progress),
 	}
 
-	if scan.TaskProcessID != "" {
+	if s.workerPool != nil && scan.TaskProcessID != "" {
 		taskInfo, err := s.workerPool.GetTaskByProcessId(worker.GetTaskByProcessIdParams{
 			ProcessId: scan.TaskProcessID,
 		})
@@ -290,6 +325,7 @@ func (s *Service) startScan(scanID string) {
 	scan.Progress = max(scan.Progress, 12)
 	scan.Stage = "Initializing scan environment"
 	scan.StartedAt = &now
+	_ = s.persistScanLocked(scan)
 }
 
 func (s *Service) updateStage(scanID string, progress int, stage string) {
@@ -303,6 +339,7 @@ func (s *Service) updateStage(scanID string, progress int, stage string) {
 
 	scan.Progress = min(max(progress, 0), 99)
 	scan.Stage = stage
+	_ = s.persistScanLocked(scan)
 }
 
 func (s *Service) setWorkerStatus(scanID string, status string) {
@@ -313,7 +350,9 @@ func (s *Service) setWorkerStatus(scanID string, status string) {
 	if scan == nil {
 		return
 	}
+
 	scan.WorkerStatus = status
+	_ = s.persistScanLocked(scan)
 }
 
 func (s *Service) attachBrowser(scanID string, browserID string, cdpURL string) {
@@ -327,6 +366,7 @@ func (s *Service) attachBrowser(scanID string, browserID string, cdpURL string) 
 
 	scan.BrowserID = browserID
 	scan.BrowserCDPURL = cdpURL
+	_ = s.persistScanLocked(scan)
 }
 
 func (s *Service) failScan(scanID string, reason string) {
@@ -349,6 +389,7 @@ func (s *Service) failScan(scanID string, reason string) {
 	scan.Progress = min(max(scan.Progress, 15), 100)
 	scan.ErrorMessage = message
 	scan.FinishedAt = &now
+	_ = s.persistScanLocked(scan)
 }
 
 func (s *Service) completeScan(scanID string, findings []Finding) {
@@ -370,6 +411,7 @@ func (s *Service) completeScan(scanID string, findings []Finding) {
 	scan.Summary = summary
 	scan.FinishedAt = &now
 	scan.ErrorMessage = ""
+	_ = s.persistScanLocked(scan)
 }
 
 func (s *Service) setEvidence(scanID string, evidence Evidence) {
@@ -382,6 +424,7 @@ func (s *Service) setEvidence(scanID string, evidence Evidence) {
 	}
 
 	scan.Evidence = evidence
+	_ = s.persistScanLocked(scan)
 }
 
 func (s *Service) getScanForTask(scanID string) (Scan, error) {
@@ -427,6 +470,386 @@ func (s *Service) cloneScan(scan *Scan) Scan {
 	return copyScan
 }
 
+func (s *Service) ensureSchema(ctx context.Context) error {
+	statements := []string{
+		`
+		CREATE TABLE IF NOT EXISTS scans (
+			id TEXT PRIMARY KEY,
+			owner_user_id TEXT NOT NULL,
+			requested_by_email TEXT NOT NULL,
+			type TEXT NOT NULL,
+			target TEXT NOT NULL,
+			standard TEXT NOT NULL,
+			device_emulation TEXT NOT NULL,
+			include_visual_contrast INTEGER NOT NULL,
+			include_sub_pages INTEGER NOT NULL,
+			status TEXT NOT NULL,
+			progress INTEGER NOT NULL,
+			stage TEXT NOT NULL,
+			error_message TEXT NOT NULL,
+			task_process_id TEXT NOT NULL,
+			worker_status TEXT NOT NULL,
+			browser_id TEXT NOT NULL,
+			browser_cdp_url TEXT NOT NULL,
+			created_at TEXT NOT NULL,
+			started_at TEXT,
+			finished_at TEXT,
+			summary_total INTEGER NOT NULL,
+			summary_critical INTEGER NOT NULL,
+			summary_serious INTEGER NOT NULL,
+			summary_moderate INTEGER NOT NULL,
+			evidence_desktop_image_url TEXT NOT NULL,
+			evidence_tablet_image_url TEXT NOT NULL,
+			evidence_mobile_image_url TEXT NOT NULL,
+			evidence_recording_image_url TEXT NOT NULL
+		);
+		`,
+		`CREATE INDEX IF NOT EXISTS idx_scans_owner_user_id ON scans(owner_user_id);`,
+		`CREATE INDEX IF NOT EXISTS idx_scans_created_at ON scans(created_at DESC);`,
+		`
+		CREATE TABLE IF NOT EXISTS scan_findings (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			scan_id TEXT NOT NULL,
+			finding_id TEXT NOT NULL,
+			title TEXT NOT NULL,
+			description TEXT NOT NULL,
+			snippet TEXT NOT NULL,
+			severity TEXT NOT NULL,
+			standard TEXT NOT NULL,
+			criterion TEXT NOT NULL,
+			method TEXT NOT NULL,
+			sort_order INTEGER NOT NULL,
+			FOREIGN KEY (scan_id) REFERENCES scans(id) ON DELETE CASCADE
+		);
+		`,
+		`CREATE INDEX IF NOT EXISTS idx_scan_findings_scan_order ON scan_findings(scan_id, sort_order);`,
+	}
+
+	for _, statement := range statements {
+		if _, err := s.db.ExecContext(ctx, statement); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Service) loadScans(ctx context.Context) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	scanRows, err := s.db.QueryContext(ctx, `
+		SELECT
+			id,
+			owner_user_id,
+			requested_by_email,
+			type,
+			target,
+			standard,
+			device_emulation,
+			include_visual_contrast,
+			include_sub_pages,
+			status,
+			progress,
+			stage,
+			error_message,
+			task_process_id,
+			worker_status,
+			browser_id,
+			browser_cdp_url,
+			created_at,
+			started_at,
+			finished_at,
+			summary_total,
+			summary_critical,
+			summary_serious,
+			summary_moderate,
+			evidence_desktop_image_url,
+			evidence_tablet_image_url,
+			evidence_mobile_image_url,
+			evidence_recording_image_url
+		FROM scans
+		ORDER BY created_at DESC
+	`)
+	if err != nil {
+		return fmt.Errorf("query scans: %w", err)
+	}
+	defer scanRows.Close()
+
+	s.scansByID = make(map[string]*Scan)
+	s.orderedScanIDs = make([]string, 0)
+
+	for scanRows.Next() {
+		var (
+			includeVisualContrast int
+			includeSubPages       int
+			startedAt             sql.NullString
+			finishedAt            sql.NullString
+			createdAtRaw          string
+			scan                  Scan
+		)
+
+		err := scanRows.Scan(
+			&scan.ID,
+			&scan.OwnerUserID,
+			&scan.RequestedByEmail,
+			&scan.Type,
+			&scan.Target,
+			&scan.Standard,
+			&scan.DeviceEmulation,
+			&includeVisualContrast,
+			&includeSubPages,
+			&scan.Status,
+			&scan.Progress,
+			&scan.Stage,
+			&scan.ErrorMessage,
+			&scan.TaskProcessID,
+			&scan.WorkerStatus,
+			&scan.BrowserID,
+			&scan.BrowserCDPURL,
+			&createdAtRaw,
+			&startedAt,
+			&finishedAt,
+			&scan.Summary.Total,
+			&scan.Summary.Critical,
+			&scan.Summary.Serious,
+			&scan.Summary.Moderate,
+			&scan.Evidence.DesktopImageURL,
+			&scan.Evidence.TabletImageURL,
+			&scan.Evidence.MobileImageURL,
+			&scan.Evidence.RecordingImageURL,
+		)
+		if err != nil {
+			return fmt.Errorf("scan row: %w", err)
+		}
+
+		scan.CreatedAt, err = parseStoreTime(createdAtRaw)
+		if err != nil {
+			return fmt.Errorf("parse scan created_at: %w", err)
+		}
+		scan.StartedAt, err = parseNullableStoreTime(startedAt)
+		if err != nil {
+			return fmt.Errorf("parse scan started_at: %w", err)
+		}
+		scan.FinishedAt, err = parseNullableStoreTime(finishedAt)
+		if err != nil {
+			return fmt.Errorf("parse scan finished_at: %w", err)
+		}
+
+		scan.IncludeVisualContrast = intToBool(includeVisualContrast)
+		scan.IncludeSubPages = intToBool(includeSubPages)
+		scan.Evidence = normalizeEvidence(scan.Evidence)
+		scan.Findings = make([]Finding, 0)
+
+		scanCopy := scan
+		s.scansByID[scan.ID] = &scanCopy
+		s.orderedScanIDs = append(s.orderedScanIDs, scan.ID)
+	}
+
+	if err := scanRows.Err(); err != nil {
+		return fmt.Errorf("iterate scan rows: %w", err)
+	}
+
+	findingsRows, err := s.db.QueryContext(ctx, `
+		SELECT
+			scan_id,
+			finding_id,
+			title,
+			description,
+			snippet,
+			severity,
+			standard,
+			criterion,
+			method
+		FROM scan_findings
+		ORDER BY scan_id, sort_order
+	`)
+	if err != nil {
+		return fmt.Errorf("query scan findings: %w", err)
+	}
+	defer findingsRows.Close()
+
+	for findingsRows.Next() {
+		var (
+			scanID  string
+			finding Finding
+		)
+
+		if err := findingsRows.Scan(
+			&scanID,
+			&finding.ID,
+			&finding.Title,
+			&finding.Description,
+			&finding.Snippet,
+			&finding.Severity,
+			&finding.Standard,
+			&finding.Criterion,
+			&finding.Method,
+		); err != nil {
+			return fmt.Errorf("scan finding row: %w", err)
+		}
+
+		scan := s.scansByID[scanID]
+		if scan == nil {
+			continue
+		}
+
+		scan.Findings = append(scan.Findings, finding)
+	}
+
+	if err := findingsRows.Err(); err != nil {
+		return fmt.Errorf("iterate findings rows: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) persistScanLocked(scan *Scan) error {
+	if scan == nil {
+		return nil
+	}
+
+	tx, err := s.db.BeginTx(context.Background(), nil)
+	if err != nil {
+		return fmt.Errorf("begin scan transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	_, err = tx.Exec(`
+		INSERT INTO scans (
+			id,
+			owner_user_id,
+			requested_by_email,
+			type,
+			target,
+			standard,
+			device_emulation,
+			include_visual_contrast,
+			include_sub_pages,
+			status,
+			progress,
+			stage,
+			error_message,
+			task_process_id,
+			worker_status,
+			browser_id,
+			browser_cdp_url,
+			created_at,
+			started_at,
+			finished_at,
+			summary_total,
+			summary_critical,
+			summary_serious,
+			summary_moderate,
+			evidence_desktop_image_url,
+			evidence_tablet_image_url,
+			evidence_mobile_image_url,
+			evidence_recording_image_url
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			owner_user_id = excluded.owner_user_id,
+			requested_by_email = excluded.requested_by_email,
+			type = excluded.type,
+			target = excluded.target,
+			standard = excluded.standard,
+			device_emulation = excluded.device_emulation,
+			include_visual_contrast = excluded.include_visual_contrast,
+			include_sub_pages = excluded.include_sub_pages,
+			status = excluded.status,
+			progress = excluded.progress,
+			stage = excluded.stage,
+			error_message = excluded.error_message,
+			task_process_id = excluded.task_process_id,
+			worker_status = excluded.worker_status,
+			browser_id = excluded.browser_id,
+			browser_cdp_url = excluded.browser_cdp_url,
+			created_at = excluded.created_at,
+			started_at = excluded.started_at,
+			finished_at = excluded.finished_at,
+			summary_total = excluded.summary_total,
+			summary_critical = excluded.summary_critical,
+			summary_serious = excluded.summary_serious,
+			summary_moderate = excluded.summary_moderate,
+			evidence_desktop_image_url = excluded.evidence_desktop_image_url,
+			evidence_tablet_image_url = excluded.evidence_tablet_image_url,
+			evidence_mobile_image_url = excluded.evidence_mobile_image_url,
+			evidence_recording_image_url = excluded.evidence_recording_image_url
+	`,
+		scan.ID,
+		scan.OwnerUserID,
+		scan.RequestedByEmail,
+		string(scan.Type),
+		scan.Target,
+		scan.Standard,
+		scan.DeviceEmulation,
+		boolToInt(scan.IncludeVisualContrast),
+		boolToInt(scan.IncludeSubPages),
+		string(scan.Status),
+		scan.Progress,
+		scan.Stage,
+		scan.ErrorMessage,
+		scan.TaskProcessID,
+		scan.WorkerStatus,
+		scan.BrowserID,
+		scan.BrowserCDPURL,
+		formatStoreTime(scan.CreatedAt),
+		nullableStoreTimeValue(scan.StartedAt),
+		nullableStoreTimeValue(scan.FinishedAt),
+		scan.Summary.Total,
+		scan.Summary.Critical,
+		scan.Summary.Serious,
+		scan.Summary.Moderate,
+		scan.Evidence.DesktopImageURL,
+		scan.Evidence.TabletImageURL,
+		scan.Evidence.MobileImageURL,
+		scan.Evidence.RecordingImageURL,
+	)
+	if err != nil {
+		return fmt.Errorf("upsert scan: %w", err)
+	}
+
+	if _, err := tx.Exec(`DELETE FROM scan_findings WHERE scan_id = ?`, scan.ID); err != nil {
+		return fmt.Errorf("delete scan findings: %w", err)
+	}
+
+	for index, finding := range scan.Findings {
+		_, err := tx.Exec(`
+			INSERT INTO scan_findings (
+				scan_id,
+				finding_id,
+				title,
+				description,
+				snippet,
+				severity,
+				standard,
+				criterion,
+				method,
+				sort_order
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`,
+			scan.ID,
+			finding.ID,
+			finding.Title,
+			finding.Description,
+			finding.Snippet,
+			string(finding.Severity),
+			finding.Standard,
+			finding.Criterion,
+			string(finding.Method),
+			index,
+		)
+		if err != nil {
+			return fmt.Errorf("insert scan finding: %w", err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit scan transaction: %w", err)
+	}
+
+	return nil
+}
+
 func defaultEvidence() Evidence {
 	return Evidence{
 		DesktopImageURL:   "https://placeholder.pics/svg/640x360",
@@ -434,6 +857,25 @@ func defaultEvidence() Evidence {
 		MobileImageURL:    "https://placeholder.pics/svg/300x540",
 		RecordingImageURL: "https://placeholder.pics/svg/640x360",
 	}
+}
+
+func normalizeEvidence(evidence Evidence) Evidence {
+	defaults := defaultEvidence()
+
+	if strings.TrimSpace(evidence.DesktopImageURL) == "" {
+		evidence.DesktopImageURL = defaults.DesktopImageURL
+	}
+	if strings.TrimSpace(evidence.TabletImageURL) == "" {
+		evidence.TabletImageURL = defaults.TabletImageURL
+	}
+	if strings.TrimSpace(evidence.MobileImageURL) == "" {
+		evidence.MobileImageURL = defaults.MobileImageURL
+	}
+	if strings.TrimSpace(evidence.RecordingImageURL) == "" {
+		evidence.RecordingImageURL = defaults.RecordingImageURL
+	}
+
+	return evidence
 }
 
 func summarizeFindings(findings []Finding) Summary {
@@ -481,4 +923,58 @@ func generateToken(prefix string, byteLength int) (string, error) {
 		return base64.RawURLEncoding.EncodeToString(bytes), nil
 	}
 	return prefix + "_" + base64.RawURLEncoding.EncodeToString(bytes), nil
+}
+
+func formatStoreTime(value time.Time) string {
+	return value.UTC().Format(time.RFC3339Nano)
+}
+
+func parseStoreTime(value string) (time.Time, error) {
+	return time.Parse(time.RFC3339Nano, strings.TrimSpace(value))
+}
+
+func parseNullableStoreTime(value sql.NullString) (*time.Time, error) {
+	if !value.Valid || strings.TrimSpace(value.String) == "" {
+		return nil, nil
+	}
+
+	parsed, err := parseStoreTime(value.String)
+	if err != nil {
+		return nil, err
+	}
+	return &parsed, nil
+}
+
+func nullableStoreTimeValue(value *time.Time) any {
+	if value == nil {
+		return nil
+	}
+	return formatStoreTime(*value)
+}
+
+func boolToInt(value bool) int {
+	if value {
+		return 1
+	}
+	return 0
+}
+
+func intToBool(value int) bool {
+	return value != 0
+}
+
+func removeScanID(scanIDs []string, scanID string) []string {
+	if len(scanIDs) == 0 {
+		return scanIDs
+	}
+
+	filtered := make([]string, 0, len(scanIDs))
+	for _, id := range scanIDs {
+		if id == scanID {
+			continue
+		}
+		filtered = append(filtered, id)
+	}
+
+	return filtered
 }

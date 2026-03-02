@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/brian-nunez/ba11y/internal/auth"
@@ -9,6 +10,7 @@ import (
 	"github.com/brian-nunez/ba11y/internal/config"
 	v1 "github.com/brian-nunez/ba11y/internal/handlers/v1"
 	"github.com/brian-nunez/ba11y/internal/scans"
+	"github.com/brian-nunez/ba11y/internal/storage"
 	"github.com/labstack/echo/v4"
 )
 
@@ -23,6 +25,7 @@ type BootstrapConfig struct {
 
 type appServer struct {
 	echo        *echo.Echo
+	db          *sql.DB
 	scanService *scans.Service
 }
 
@@ -35,13 +38,28 @@ func (s *appServer) Shutdown(ctx context.Context) error {
 		s.scanService.Shutdown()
 	}
 
+	if s.db != nil {
+		if err := s.db.Close(); err != nil {
+			return err
+		}
+	}
+
 	return s.echo.Shutdown(ctx)
 }
 
 func Bootstrap(bootstrapConfig BootstrapConfig) Server {
 	appConfig := config.Load()
 
-	authService := auth.NewService()
+	db, err := storage.OpenSQLite(appConfig.AppDatabasePath)
+	if err != nil {
+		panic(fmt.Errorf("open sqlite database: %w", err))
+	}
+
+	authService, err := auth.NewService(db)
+	if err != nil {
+		panic(fmt.Errorf("bootstrap auth service: %w", err))
+	}
+
 	scanAuthorizer := authorization.NewScanAuthorizer()
 	scanService, err := scans.NewService(scans.Config{
 		BBAASBaseURL:       appConfig.BBAASBaseURL,
@@ -49,7 +67,7 @@ func Bootstrap(bootstrapConfig BootstrapConfig) Server {
 		WorkerConcurrency:  appConfig.WorkerConcurrency,
 		WorkerLogPath:      appConfig.WorkerLogPath,
 		WorkerDatabasePath: appConfig.WorkerDatabasePath,
-	}, scanAuthorizer)
+	}, scanAuthorizer, db)
 	if err != nil {
 		panic(fmt.Errorf("bootstrap scan service: %w", err))
 	}
@@ -69,6 +87,7 @@ func Bootstrap(bootstrapConfig BootstrapConfig) Server {
 
 	return &appServer{
 		echo:        server,
+		db:          db,
 		scanService: scanService,
 	}
 }

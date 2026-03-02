@@ -1,12 +1,11 @@
 package scans
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html"
 	"net/url"
-	"os"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -164,12 +163,7 @@ func loadTarget(page playwright.Page, scan Scan) error {
 	return nil
 }
 
-func captureEvidence(page playwright.Page, scanID string) (Evidence, error) {
-	outputDirectory := filepath.Join("assets", "generated", "scans")
-	if err := os.MkdirAll(outputDirectory, 0o755); err != nil {
-		return defaultEvidence(), fmt.Errorf("create evidence directory: %w", err)
-	}
-
+func captureEvidence(page playwright.Page, _ string) (Evidence, error) {
 	type shot struct {
 		name   string
 		width  int
@@ -188,16 +182,14 @@ func captureEvidence(page playwright.Page, scanID string) (Evidence, error) {
 			return defaultEvidence(), fmt.Errorf("set %s viewport: %w", shotConfig.name, err)
 		}
 
-		fileName := fmt.Sprintf("%s-%s.png", scanID, shotConfig.name)
-		absolutePath := filepath.Join(outputDirectory, fileName)
-		if _, err := page.Screenshot(playwright.PageScreenshotOptions{
-			Path:     playwright.String(absolutePath),
+		imageBytes, err := page.Screenshot(playwright.PageScreenshotOptions{
 			FullPage: playwright.Bool(true),
-		}); err != nil {
+		})
+		if err != nil {
 			return defaultEvidence(), fmt.Errorf("capture %s screenshot: %w", shotConfig.name, err)
 		}
 
-		urls[shotConfig.name] = "/assets/generated/scans/" + fileName
+		urls[shotConfig.name] = "data:image/png;base64," + base64.StdEncoding.EncodeToString(imageBytes)
 	}
 
 	return Evidence{

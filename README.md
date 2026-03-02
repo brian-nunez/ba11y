@@ -19,7 +19,7 @@ Currently disabled:
 
 ## Required Integrations
 
-This app is intentionally wired to your libraries:
+This app is intentionally wired to my libraries:
 
 - `bbaas-api` SDK for browser provisioning and lifecycle operations
   - Import: `github.com/brian-nunez/bbaas-api/sdk/go/bbaas`
@@ -29,8 +29,6 @@ This app is intentionally wired to your libraries:
   - Import: `github.com/brian-nunez/baccess`
 
 ## Auth Flow
-
-The auth/session flow follows the `bbaas-api` web flow pattern:
 
 - `GET /register`, `POST /register`
 - `GET /login`, `POST /login`
@@ -54,12 +52,20 @@ The auth/session flow follows the `bbaas-api` web flow pattern:
 ## Environment Variables
 
 - `PORT` (default: `8090`)
+- `APP_DATABASE_PATH` (default: `./data/ba11y.db`)
 - `BBAAS_BASE_URL` (default: `http://127.0.0.1:8080`)
 - `BBAAS_API_TOKEN` (preferred) or `BBAAS_API_KEY` (fallback; required to run scans)
 - `SCAN_WORKER_CONCURRENCY` (default: `3`)
 - `SCAN_WORKER_LOG_PATH` (default: `./data/logs`)
-- `SCAN_WORKER_DB_PATH` (default: `./data/tasks.db`)
+- `SCAN_WORKER_DB_PATH` (default: same as `APP_DATABASE_PATH`)
 - `PLAYWRIGHT_DRIVER_PATH` (optional, custom driver path)
+
+All app state is persisted in SQLite:
+- users and password hashes
+- session tokens
+- scan requests and scan progress metadata
+- scan evidence metadata
+- full scan findings/results
 
 ## Local Development
 
