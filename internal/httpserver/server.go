@@ -2,8 +2,14 @@ package httpserver
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/brian-nunez/ba11y/internal/auth"
+	"github.com/brian-nunez/ba11y/internal/authorization"
+	"github.com/brian-nunez/ba11y/internal/config"
 	v1 "github.com/brian-nunez/ba11y/internal/handlers/v1"
+	"github.com/brian-nunez/ba11y/internal/scans"
+	"github.com/labstack/echo/v4"
 )
 
 type Server interface {
@@ -15,14 +21,54 @@ type BootstrapConfig struct {
 	StaticDirectories map[string]string
 }
 
-func Bootstrap(config BootstrapConfig) Server {
+type appServer struct {
+	echo        *echo.Echo
+	scanService *scans.Service
+}
+
+func (s *appServer) Start(addr string) error {
+	return s.echo.Start(addr)
+}
+
+func (s *appServer) Shutdown(ctx context.Context) error {
+	if s.scanService != nil {
+		s.scanService.Shutdown()
+	}
+
+	return s.echo.Shutdown(ctx)
+}
+
+func Bootstrap(bootstrapConfig BootstrapConfig) Server {
+	appConfig := config.Load()
+
+	authService := auth.NewService()
+	scanAuthorizer := authorization.NewScanAuthorizer()
+	scanService, err := scans.NewService(scans.Config{
+		BBAASBaseURL:       appConfig.BBAASBaseURL,
+		BBAASAPIToken:      appConfig.BBAASAPIToken,
+		WorkerConcurrency:  appConfig.WorkerConcurrency,
+		WorkerLogPath:      appConfig.WorkerLogPath,
+		WorkerDatabasePath: appConfig.WorkerDatabasePath,
+	}, scanAuthorizer)
+	if err != nil {
+		panic(fmt.Errorf("bootstrap scan service: %w", err))
+	}
+
 	server := New().
-		WithStaticAssets(config.StaticDirectories).
+		WithStaticAssets(bootstrapConfig.StaticDirectories).
 		WithDefaultMiddleware().
 		WithErrorHandler().
-		WithRoutes(v1.RegisterRoutes).
+		WithRoutes(func(e *echo.Echo) {
+			v1.RegisterRoutes(e, v1.Dependencies{
+				AuthService: authService,
+				ScanService: scanService,
+			})
+		}).
 		WithNotFound().
 		Build()
 
-	return server
+	return &appServer{
+		echo:        server,
+		scanService: scanService,
+	}
 }

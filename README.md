@@ -1,73 +1,101 @@
-# Go, Echo, Templ, Tailwind Starter Template
+# ba11y
 
-A fast, minimal starter template for building server-rendered web applications in Go using Echo, Templ, TailwindCSS, and Templ UI.
+`ba11y` is a server-rendered accessibility scanning application built with Go, Echo, Templ, and Tailwind.
 
-This project gives you a solid foundation to build from — with preconfigured defaults, an opinionated folder structure, and server-rendered HTML out of the box.
+It supports scans for:
+- Web pages
+- Emails
+- PDF documents
+- Multi-step user journeys
 
----
+## Core Stack
 
-## Features
+- [Go](https://go.dev/)
+- [Echo](https://echo.labstack.com/)
+- [Templ](https://templ.guide/)
+- [TailwindCSS](https://tailwindcss.com/)
 
-- Fast startup, zero config needed
-- Opinionated folder structure with `/cmd` and `/internal`
-- Templ components using [`templ`](https://templ.guide)
-- Utility-first styling with TailwindCSS
-- Templ UI support preconfigured (All components are installed)
-- Clean routing with Echo (My favorite Go web framework)
-- Centralized error handling
-- Graceful shutdown
-- Makefile-driven dev workflow
+## Required Integrations
 
----
+This app is intentionally wired to your libraries:
 
-## Tool Links
+- `bbaas-api` SDK for browser provisioning and lifecycle operations
+  - Import: `github.com/brian-nunez/bbaas-api/sdk/go/bbaas`
+- `task-orchestration` for async scan orchestration and worker state
+  - Import: `github.com/brian-nunez/task-orchestration`
+- `baccess` for RBAC/ABAC authorization checks
+  - Import: `github.com/brian-nunez/baccess`
 
-- **[Echo](https://echo.labstack.com/)**: A high-performance, minimalist web framework for Go.
-- **[Templ](https://templ.guide/)**: A Go HTML templating engine that allows you to build reusable components.
-- **[TailwindCSS](https://tailwindcss.com/)**: A utility-first CSS framework for rapid UI development.
-- **[Templ UI](https://templui.io/)**: A collection of prebuilt components for Templ, making it easy to build beautiful UIs.
-- **[Air](https://github.com/air-verse/air)**: A live reloading tool for Go applications, making development faster and smoother.
+## Auth Flow
 
+The auth/session flow follows the `bbaas-api` web flow pattern:
 
-## Project Structure
+- `GET /register`, `POST /register`
+- `GET /login`, `POST /login`
+- `POST /logout`
+- Session middleware reads cookie `bbaas_session`
+- `RequireAuth` / `RequireGuest` route guards
 
-``` If you're actually looking at this, message me if you do anything cool with this template! xD
-├── cmd/                # Entrypoint (main.go)
-├── internal/           # Application logic
-│   ├── handlers/       # HTTP handlers
-│   │   ├── errors/     # Centralized error response logic
-│   │   └── v1/         # Versioned routing
-│   └── httpserver/     # Server wiring & middleware
-├── .templui.json       # Templ UI config
-├── Makefile            # Dev commands
-```
+## Scan Flow
 
----
+1. User submits a scan from `/scans/new`
+2. A scan task is queued via `task-orchestration`
+3. Worker task uses `bbaas` SDK to:
+   - Spawn a browser (`SpawnBrowser`)
+   - Keep session alive (`KeepAliveBrowser`)
+   - Close browser (`CloseBrowser`)
+4. Progress is polled from `/api/v1/scans/:scanId/status`
+5. Completed scans render detailed reports at `/scans/:scanId/report`
 
-## Get Started
+## Environment Variables
 
-### 1. Clone the repo
+- `PORT` (default: `8090`)
+- `BBAAS_BASE_URL` (default: `http://127.0.0.1:8080`)
+- `BBAAS_API_TOKEN` (required to run scans successfully)
+- `SCAN_WORKER_CONCURRENCY` (default: `3`)
+- `SCAN_WORKER_LOG_PATH` (default: `./data/logs`)
+- `SCAN_WORKER_DB_PATH` (default: `./data/tasks.db`)
+
+## Local Development
+
+### Prereqs
+
+- Go 1.25+
+- `templ`
+- `tailwindcss`
+- `air` (optional, for hot reload)
+
+### Install dependencies
 
 ```bash
-git clone https://github.com/brian-nunez/go-echo-templ-tailwind-template.git
-cd go-echo-templ-tailwind-template
+go mod tidy
 ```
 
-### 2. Install dependencies
-
-* Go 1.22+
-* templ
-* tailwindcss
-* air (for live reloading)
-
-### 3. Run in dev mode
+### Run
 
 ```bash
 make dev
 ```
 
-## Reach out if you have questions or just want to chat!
+### Build/test
 
-- [GitHub](https://www.github.com/brian-nunez)
-- [LinkedIn](https://www.linkedin.com/in/brianjnunez)
+```bash
+make deps
+go test ./...
+```
+
+## Key Routes
+
+UI routes:
+- `/`
+- `/register`
+- `/login`
+- `/scans`
+- `/scans/new`
+- `/scans/:scanId/progress`
+- `/scans/:scanId/report`
+
+API routes:
+- `/api/v1/health`
+- `/api/v1/scans/:scanId/status`
 

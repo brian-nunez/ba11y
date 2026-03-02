@@ -1,0 +1,69 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/brian-nunez/ba11y/internal/auth"
+	"github.com/brian-nunez/ba11y/internal/scans"
+)
+
+templ ScanHistoryPage(session SessionView, currentUser auth.User, recentScans []scans.Scan) {
+	@Layout("A11y Scanner - Reports") {
+		<div class="min-h-screen">
+			@AppHeader(session)
+			<main class="mx-auto w-full max-w-6xl px-4 py-8 md:px-8">
+				<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+					<div>
+						<h1 class="text-3xl font-bold">Scan History</h1>
+						<p class="mt-1 text-sm text-slate-500">All scans for { currentUser.Email }.</p>
+					</div>
+					<a href="/scans/new" class="inline-flex h-10 items-center rounded-lg bg-[#137fec] px-4 text-sm font-semibold text-white hover:bg-[#0f72d6]">Start New Scan</a>
+				</div>
+
+				<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+					<table class="w-full border-collapse text-left">
+						<thead>
+							<tr class="border-b border-slate-200 bg-slate-50">
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Scan</th>
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Type</th>
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Status</th>
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Created</th>
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Action</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-slate-100">
+							if len(recentScans) == 0 {
+								<tr>
+									<td class="px-5 py-8 text-sm text-slate-500" colspan="5">No scans yet. Create your first scan.</td>
+								</tr>
+							}
+							for _, scan := range recentScans {
+								<tr class="hover:bg-slate-50/60">
+									<td class="px-5 py-4">
+										<p class="font-semibold text-slate-800">{ scan.Target }</p>
+										<p class="text-xs text-slate-500">#{ scan.ID }</p>
+									</td>
+									<td class="px-5 py-4 text-sm text-slate-700">{ HumanScanType(scan.Type) }</td>
+									<td class="px-5 py-4">
+										<span class={ HistoryStatusClass(scan.Status) }>{ string(scan.Status) }</span>
+									</td>
+									<td class="px-5 py-4 text-sm text-slate-600">{ FormattedScanTime(scan.CreatedAt) }</td>
+									<td class="px-5 py-4">
+										if scan.Status == scans.ScanStatusCompleted {
+											<a class="text-sm font-semibold text-[#137fec] hover:underline" href={ "/scans/" + scan.ID + "/report" }>Open Report</a>
+										} else {
+											<a class="text-sm font-semibold text-[#137fec] hover:underline" href={ "/scans/" + scan.ID + "/progress" }>View Progress</a>
+										}
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+
+				if len(recentScans) > 0 {
+					<div class="mt-4 text-sm text-slate-500">Total scans: { fmt.Sprint(len(recentScans)) }</div>
+				}
+			</main>
+		</div>
+	}
+}

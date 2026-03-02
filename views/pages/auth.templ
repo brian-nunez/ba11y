@@ -1,0 +1,38 @@
+package pages
+
+templ AuthPage(title string, action string, submitLabel string, secondaryText string, secondaryURL string, secondaryLabel string, errorMessage string, email string) {
+	@Layout("AllyPortal - "+title) {
+		<div class="min-h-screen flex items-center justify-center px-4 py-10">
+			<div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+				<div class="mb-8 text-center">
+					<div class="mx-auto mb-3 size-10 rounded-lg bg-[#137fec] text-white flex items-center justify-center">
+						<span class="material-symbols-outlined">accessibility</span>
+					</div>
+					<h1 class="text-2xl font-bold">{ title }</h1>
+					<p class="mt-2 text-sm text-slate-500">Use your email and password to continue.</p>
+				</div>
+				if errorMessage != "" {
+					<div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{ errorMessage }</div>
+				}
+				<form action={ action } method="post" class="space-y-4">
+					<div class="space-y-1">
+						<label class="text-sm font-medium text-slate-700">Email</label>
+						<input type="email" name="email" value={ email } required class="h-11 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20"/>
+					</div>
+					<div class="space-y-1">
+						<label class="text-sm font-medium text-slate-700">Password</label>
+						<input type="password" name="password" required class="h-11 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20"/>
+					</div>
+					<button type="submit" class="h-11 w-full rounded-lg bg-[#137fec] font-bold text-white hover:bg-[#0f72d6]">{ submitLabel }</button>
+				</form>
+				<div class="mt-5 text-center text-sm text-slate-500">
+					{ secondaryText }
+					<a href={ secondaryURL } class="ml-1 font-semibold text-[#137fec] hover:underline">{ secondaryLabel }</a>
+				</div>
+				<div class="mt-6 text-center text-sm">
+					<a href="/" class="text-slate-500 hover:text-[#137fec]">Back to home</a>
+				</div>
+			</div>
+		</div>
+	}
+}

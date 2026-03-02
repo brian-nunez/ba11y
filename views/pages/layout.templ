@@ -1,11 +1,21 @@
 package pages
 
-templ Layout() {
+templ Layout(title string) {
+	<!DOCTYPE html>
 	<html lang="en">
 		<head>
-			<script src="/assets/js/lib/htmx.js"></script>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>{ title }</title>
+			<link rel="preconnect" href="https://fonts.googleapis.com"/>
+			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+			<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 			<link rel="stylesheet" href="/assets/css/output.css"/>
+			<script src="/assets/js/lib/htmx.js"></script>
 		</head>
-		{ children... }
+		<body class="min-h-screen bg-[#f6f7f8] text-slate-900 [font-family:Inter,sans-serif]">
+			{ children... }
+		</body>
 	</html>
 }

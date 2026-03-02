@@ -1,0 +1,141 @@
+package pages
+
+import (
+	"github.com/brian-nunez/ba11y/internal/auth"
+	"github.com/brian-nunez/ba11y/internal/scans"
+)
+
+templ NewScanPage(session SessionView, currentUser auth.User, recentScans []scans.Scan, form ScanFormView, successMessage string, errorMessage string) {
+	@Layout("Accessibility Scanner - Select Scan Type") {
+		<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+			<div class="layout-container flex h-full grow flex-col">
+				@AppHeader(session)
+				<main class="flex flex-1 justify-center px-4 py-10">
+					<div class="layout-content-container flex w-full max-w-[960px] flex-1 flex-col">
+						<div class="mb-2 p-4">
+							<p class="text-xs uppercase tracking-[0.14em] text-[#137fec] font-semibold">Workspace</p>
+							<p class="text-sm text-slate-500">Signed in as { currentUser.Email }</p>
+						</div>
+						<div class="mb-6 flex flex-col gap-3 p-4">
+							<h1 class="text-[32px] font-bold leading-tight text-slate-900">Start a new scan</h1>
+							<p class="text-base leading-normal text-slate-600">Select the digital asset you want to audit for WCAG compliance. Our engine checks contrast, screen reader compatibility, and structure.</p>
+						</div>
+						if successMessage != "" {
+							<div class="mx-4 mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{ successMessage }</div>
+						}
+						if errorMessage != "" {
+							<div class="mx-4 mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{ errorMessage }</div>
+						}
+
+						<form action="/scans" method="post">
+							<div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
+								<label class={ ScanTypeCardClass(form.IsSelected(scans.ScanTypeWebPage)) }>
+									<input type="radio" class="absolute right-4 top-4 h-5 w-5 text-[#137fec] focus:ring-[#137fec]" name="scan_type" value="webpage" checked?={ form.IsSelected(scans.ScanTypeWebPage) }/>
+									<div class={ ScanTypeIconClass(form.IsSelected(scans.ScanTypeWebPage)) }>
+										<span class="material-symbols-outlined text-5xl">language</span>
+									</div>
+									<div>
+										<p class="text-base font-bold">Web Page</p>
+										<p class="text-xs text-slate-500">Scan a single URL for live accessibility issues</p>
+									</div>
+								</label>
+
+								<label class={ ScanTypeCardClass(form.IsSelected(scans.ScanTypeEmail)) }>
+									<input type="radio" class="absolute right-4 top-4 h-5 w-5 text-[#137fec] focus:ring-[#137fec]" name="scan_type" value="email" checked?={ form.IsSelected(scans.ScanTypeEmail) }/>
+									<div class={ ScanTypeIconClass(form.IsSelected(scans.ScanTypeEmail)) }>
+										<span class="material-symbols-outlined text-5xl">alternate_email</span>
+									</div>
+									<div>
+										<p class="text-base font-bold">Email</p>
+										<p class="text-xs text-slate-500">Upload HTML or paste email text content</p>
+									</div>
+								</label>
+
+								<label class={ ScanTypeCardClass(form.IsSelected(scans.ScanTypePDF)) }>
+									<input type="radio" class="absolute right-4 top-4 h-5 w-5 text-[#137fec] focus:ring-[#137fec]" name="scan_type" value="pdf" checked?={ form.IsSelected(scans.ScanTypePDF) }/>
+									<div class={ ScanTypeIconClass(form.IsSelected(scans.ScanTypePDF)) }>
+										<span class="material-symbols-outlined text-5xl">picture_as_pdf</span>
+									</div>
+									<div>
+										<p class="text-base font-bold">PDF Document</p>
+										<p class="text-xs text-slate-500">Analyze tagging, reading order, and contrast</p>
+									</div>
+								</label>
+
+								<label class={ ScanTypeCardClass(form.IsSelected(scans.ScanTypeJourney)) }>
+									<input type="radio" class="absolute right-4 top-4 h-5 w-5 text-[#137fec] focus:ring-[#137fec]" name="scan_type" value="journey" checked?={ form.IsSelected(scans.ScanTypeJourney) }/>
+									<div class={ ScanTypeIconClass(form.IsSelected(scans.ScanTypeJourney)) }>
+										<span class="material-symbols-outlined text-5xl">linear_scale</span>
+									</div>
+									<div>
+										<p class="text-base font-bold">User Journey</p>
+										<p class="text-xs text-slate-500">Test multi-step workflows like checkouts</p>
+									</div>
+								</label>
+							</div>
+
+							<div class="mt-8 rounded-xl border border-slate-200 bg-white p-4">
+								<h3 class="mb-4 flex items-center gap-2 text-lg font-bold">
+									<span class="material-symbols-outlined">settings</span>
+									Scan Configuration
+								</h3>
+								<div class="space-y-6">
+									<div class="flex flex-col gap-2">
+										<label class="text-sm font-medium text-slate-700">Asset Target</label>
+										<div class="relative">
+											<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><span class="material-symbols-outlined text-sm">link</span></span>
+											<input type="text" name="target" value={ form.Target } placeholder="https://example.com or paste HTML/text" class="w-full rounded-lg border border-slate-300 bg-slate-50 py-3 pl-10 pr-4 outline-none transition-all focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20"/>
+										</div>
+									</div>
+									<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+										<div class="flex flex-col gap-2">
+											<label class="text-sm font-medium text-slate-700">Standard</label>
+											<select name="standard" class="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20">
+												for _, standard := range StandardOptions() {
+													<option value={ standard } selected?={ standard == form.Standard }>{ standard }</option>
+												}
+											</select>
+										</div>
+										<div class="flex flex-col gap-2">
+											<label class="text-sm font-medium text-slate-700">Device Emulation</label>
+											<select name="device_emulation" class="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20">
+												for _, device := range DeviceOptions() {
+													<option value={ device } selected?={ device == form.DeviceEmulation }>{ device }</option>
+												}
+											</select>
+										</div>
+									</div>
+									<div class="space-y-3 pt-2">
+										<label class="group flex cursor-pointer items-center gap-3">
+											<input type="checkbox" name="include_visual_contrast" class="h-5 w-5 rounded border-slate-300 text-[#137fec] focus:ring-[#137fec]" checked?={ form.IncludeVisualContrast }/>
+											<span class="text-sm text-slate-600 group-hover:text-slate-900">Include visual contrast analysis (OCR)</span>
+										</label>
+										<label class="group flex cursor-pointer items-center gap-3">
+											<input type="checkbox" name="include_subpages" class="h-5 w-5 rounded border-slate-300 text-[#137fec] focus:ring-[#137fec]" checked?={ form.IncludeSubPages }/>
+											<span class="text-sm text-slate-600 group-hover:text-slate-900">Scan sub-pages (Up to 5 levels)</span>
+										</label>
+									</div>
+								</div>
+							</div>
+
+							<div class="mt-8 flex items-center justify-between px-4">
+								<a href="/" class="px-6 py-3 font-bold text-slate-600 hover:text-slate-900">Cancel</a>
+								<div class="flex gap-4">
+									<button type="button" class="flex items-center gap-2 rounded-lg bg-slate-200 px-6 py-3 font-bold text-slate-700 hover:bg-slate-300">
+										<span class="material-symbols-outlined">save</span>
+										Save Draft
+									</button>
+									<button type="submit" class="flex items-center gap-2 rounded-lg bg-[#137fec] px-10 py-3 font-bold text-white shadow-lg shadow-[#137fec]/20 hover:bg-[#0f72d6]">
+										Run Scan
+										<span class="material-symbols-outlined">rocket_launch</span>
+									</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</main>
+				@AppFooter()
+			</div>
+		</div>
+	}
+}
