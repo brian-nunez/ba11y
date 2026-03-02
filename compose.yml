@@ -1,6 +1,6 @@
 services:
   ba11y:
-    image: briannunez/ba11y:latest
+    image: briannunez/ba11y:v1.0.0
     restart: unless-stopped
     ports:
       - "8090:8090"
