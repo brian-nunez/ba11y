@@ -7,7 +7,6 @@ import (
 	"html"
 	"net/url"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/playwright-community/playwright-go"
@@ -35,15 +34,20 @@ type axeResultPayload struct {
 	Violations []axeViolation `json:"violations"`
 }
 
+type AxeAuditResult struct {
+	Findings []Finding
+	RawJSON  string
+}
+
 func installPlaywrightDriver() error {
 	return playwright.Install(&playwright.RunOptions{SkipInstallBrowsers: true})
 }
 
-func runAxeAudit(page playwright.Page, standard string, includeBestPractices bool) ([]Finding, error) {
+func runAxeAudit(page playwright.Page, standard string, includeBestPractices bool) (AxeAuditResult, error) {
 	if _, err := page.AddScriptTag(playwright.PageAddScriptTagOptions{
 		URL: playwright.String(axeCoreCDNURL),
 	}); err != nil {
-		return nil, fmt.Errorf("inject axe-core: %w", err)
+		return AxeAuditResult{}, fmt.Errorf("inject axe-core: %w", err)
 	}
 
 	rawResult, err := page.Evaluate(`async (params) => {
@@ -77,20 +81,28 @@ func runAxeAudit(page playwright.Page, standard string, includeBestPractices boo
 		"tags": standardToAxeTags(standard, includeBestPractices),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("run axe-core: %w", err)
+		return AxeAuditResult{}, fmt.Errorf("run axe-core: %w", err)
 	}
 
 	payloadBytes, err := json.Marshal(rawResult)
 	if err != nil {
-		return nil, fmt.Errorf("marshal axe result: %w", err)
+		return AxeAuditResult{}, fmt.Errorf("marshal axe result: %w", err)
 	}
 
 	var payload axeResultPayload
 	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
-		return nil, fmt.Errorf("unmarshal axe result: %w", err)
+		return AxeAuditResult{}, fmt.Errorf("unmarshal axe result: %w", err)
 	}
 
-	return mapAxeViolationsToFindings(payload.Violations, standard), nil
+	normalizedPayload, err := json.Marshal(payload)
+	if err != nil {
+		return AxeAuditResult{}, fmt.Errorf("marshal normalized axe payload: %w", err)
+	}
+
+	return AxeAuditResult{
+		Findings: mapAxeViolationsToFindings(payload.Violations, standard),
+		RawJSON:  string(normalizedPayload),
+	}, nil
 }
 
 func setViewportForDevice(page playwright.Page, device string) error {
@@ -300,25 +312,39 @@ func mapAxeViolationsToFindings(violations []axeViolation, standard string) []Fi
 			}
 
 			findingID := fmt.Sprintf("%s-%d", violation.ID, index+1)
+			rawFindingJSON, err := json.Marshal(struct {
+				Violation axeViolation `json:"violation"`
+				Node      axeNode      `json:"node"`
+				NodeIndex int          `json:"nodeIndex"`
+			}{
+				Violation: violation,
+				Node:      node,
+				NodeIndex: index,
+			})
+			if err != nil {
+				rawFindingJSON = []byte("{}")
+			}
+
 			findings = append(findings, Finding{
 				ID:          findingID,
+				RuleID:      strings.TrimSpace(violation.ID),
 				Title:       title,
 				Description: description,
 				Snippet:     truncate(snippet, 280),
+				NodeHTML:    compactWhitespace(node.HTML),
+				Failure:     compactWhitespace(node.FailureSummary),
 				Severity:    mapAxeImpact(violation.Impact),
+				Impact:      strings.ToLower(strings.TrimSpace(violation.Impact)),
 				Standard:    standard,
 				Criterion:   criterionFromTags(violation.Tags),
 				Method:      MethodAutomated,
+				HelpURL:     strings.TrimSpace(violation.HelpURL),
+				Tags:        cleanStringSlice(violation.Tags),
+				Targets:     cleanStringSlice(node.Target),
+				RawJSON:     string(rawFindingJSON),
 			})
 		}
 	}
-
-	sort.SliceStable(findings, func(i int, j int) bool {
-		if findings[i].Severity == findings[j].Severity {
-			return findings[i].ID < findings[j].ID
-		}
-		return severityRank(findings[i].Severity) < severityRank(findings[j].Severity)
-	})
 
 	return findings
 }
@@ -331,17 +357,6 @@ func mapAxeImpact(impact string) FindingSeverity {
 		return SeveritySerious
 	default:
 		return SeverityModerate
-	}
-}
-
-func severityRank(severity FindingSeverity) int {
-	switch severity {
-	case SeverityCritical:
-		return 0
-	case SeveritySerious:
-		return 1
-	default:
-		return 2
 	}
 }
 
@@ -382,4 +397,16 @@ func truncate(value string, limit int) string {
 		return value[:limit]
 	}
 	return value[:limit-3] + "..."
+}
+
+func cleanStringSlice(values []string) []string {
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		out = append(out, trimmed)
+	}
+	return out
 }

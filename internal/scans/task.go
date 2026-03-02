@@ -114,7 +114,7 @@ func (t *scanTask) Process(ctx context.Context, pc *worker.ProcessContext) error
 	}
 
 	t.service.updateStage(t.scanID, 70, "Running axe-core accessibility checks")
-	findings, err := runAxeAudit(page, scan.Standard, scan.IncludeBestPractices)
+	auditResult, err := runAxeAudit(page, scan.Standard, scan.IncludeBestPractices)
 	if err != nil {
 		if t.isCanceled() {
 			t.service.setWorkerStatus(t.scanID, "canceled")
@@ -133,7 +133,7 @@ func (t *scanTask) Process(ctx context.Context, pc *worker.ProcessContext) error
 	t.service.setEvidence(t.scanID, evidence)
 
 	t.service.updateStage(t.scanID, 96, "Finalizing report")
-	t.service.completeScan(t.scanID, findings)
+	t.service.completeScan(t.scanID, auditResult.Findings, auditResult.RawJSON)
 	t.service.setWorkerStatus(t.scanID, "completed")
 
 	return nil

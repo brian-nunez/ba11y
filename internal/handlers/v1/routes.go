@@ -30,6 +30,7 @@ func RegisterRoutes(e *echo.Echo, dependencies Dependencies) {
 	e.POST("/scans/:scanId/cancel", handler.CancelScan, uihandlers.RequireAuth)
 	e.GET("/scans/:scanId/progress", handler.ScanProgress, uihandlers.RequireAuth)
 	e.GET("/scans/:scanId/report", handler.ScanReport, uihandlers.RequireAuth)
+	e.GET("/scans/:scanId/export", handler.ExportScanReport, uihandlers.RequireAuth)
 
 	v1Group := e.Group("/api/v1")
 	v1Group.GET("/health", HealthHandler)

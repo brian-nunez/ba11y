@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -393,7 +394,7 @@ func (s *Service) failScan(scanID string, reason string) {
 	_ = s.persistScanLocked(scan)
 }
 
-func (s *Service) completeScan(scanID string, findings []Finding) {
+func (s *Service) completeScan(scanID string, findings []Finding, axeRaw string) {
 	now := s.now().UTC()
 	summary := summarizeFindings(findings)
 
@@ -410,6 +411,7 @@ func (s *Service) completeScan(scanID string, findings []Finding) {
 	scan.Stage = "Scan complete"
 	scan.Findings = findings
 	scan.Summary = summary
+	scan.AxeRaw = strings.TrimSpace(axeRaw)
 	scan.FinishedAt = &now
 	scan.ErrorMessage = ""
 	_ = s.persistScanLocked(scan)
@@ -458,7 +460,8 @@ func (s *Service) cloneScan(scan *Scan) Scan {
 	}
 
 	copyScan := *scan
-	copyScan.Findings = slices.Clone(scan.Findings)
+	copyScan.Findings = cloneFindings(scan.Findings)
+	copyScan.AxeRaw = scan.AxeRaw
 	if scan.StartedAt != nil {
 		started := *scan.StartedAt
 		copyScan.StartedAt = &started
@@ -500,6 +503,7 @@ func (s *Service) ensureSchema(ctx context.Context) error {
 			summary_critical INTEGER NOT NULL,
 			summary_serious INTEGER NOT NULL,
 			summary_moderate INTEGER NOT NULL,
+			axe_raw_json TEXT NOT NULL DEFAULT '',
 			evidence_desktop_image_url TEXT NOT NULL,
 			evidence_tablet_image_url TEXT NOT NULL,
 			evidence_mobile_image_url TEXT NOT NULL,
@@ -513,13 +517,21 @@ func (s *Service) ensureSchema(ctx context.Context) error {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			scan_id TEXT NOT NULL,
 			finding_id TEXT NOT NULL,
+			rule_id TEXT NOT NULL DEFAULT '',
 			title TEXT NOT NULL,
 			description TEXT NOT NULL,
 			snippet TEXT NOT NULL,
+			node_html TEXT NOT NULL DEFAULT '',
+			failure_summary TEXT NOT NULL DEFAULT '',
 			severity TEXT NOT NULL,
+			impact TEXT NOT NULL DEFAULT '',
 			standard TEXT NOT NULL,
 			criterion TEXT NOT NULL,
 			method TEXT NOT NULL,
+			help_url TEXT NOT NULL DEFAULT '',
+			tags_json TEXT NOT NULL DEFAULT '[]',
+			targets_json TEXT NOT NULL DEFAULT '[]',
+			raw_json TEXT NOT NULL DEFAULT '{}',
 			sort_order INTEGER NOT NULL,
 			FOREIGN KEY (scan_id) REFERENCES scans(id) ON DELETE CASCADE
 		);
@@ -534,6 +546,33 @@ func (s *Service) ensureSchema(ctx context.Context) error {
 	}
 
 	if err := s.ensureScansColumn(ctx, "include_best_practices", "INTEGER NOT NULL DEFAULT 0"); err != nil {
+		return err
+	}
+	if err := s.ensureScansColumn(ctx, "axe_raw_json", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return err
+	}
+	if err := s.ensureScanFindingsColumn(ctx, "rule_id", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return err
+	}
+	if err := s.ensureScanFindingsColumn(ctx, "node_html", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return err
+	}
+	if err := s.ensureScanFindingsColumn(ctx, "failure_summary", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return err
+	}
+	if err := s.ensureScanFindingsColumn(ctx, "impact", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return err
+	}
+	if err := s.ensureScanFindingsColumn(ctx, "help_url", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return err
+	}
+	if err := s.ensureScanFindingsColumn(ctx, "tags_json", "TEXT NOT NULL DEFAULT '[]'"); err != nil {
+		return err
+	}
+	if err := s.ensureScanFindingsColumn(ctx, "targets_json", "TEXT NOT NULL DEFAULT '[]'"); err != nil {
+		return err
+	}
+	if err := s.ensureScanFindingsColumn(ctx, "raw_json", "TEXT NOT NULL DEFAULT '{}'"); err != nil {
 		return err
 	}
 
@@ -571,6 +610,7 @@ func (s *Service) loadScans(ctx context.Context) error {
 			summary_critical,
 			summary_serious,
 			summary_moderate,
+			axe_raw_json,
 			evidence_desktop_image_url,
 			evidence_tablet_image_url,
 			evidence_mobile_image_url,
@@ -623,6 +663,7 @@ func (s *Service) loadScans(ctx context.Context) error {
 			&scan.Summary.Critical,
 			&scan.Summary.Serious,
 			&scan.Summary.Moderate,
+			&scan.AxeRaw,
 			&scan.Evidence.DesktopImageURL,
 			&scan.Evidence.TabletImageURL,
 			&scan.Evidence.MobileImageURL,
@@ -664,13 +705,21 @@ func (s *Service) loadScans(ctx context.Context) error {
 		SELECT
 			scan_id,
 			finding_id,
+			rule_id,
 			title,
 			description,
 			snippet,
+			node_html,
+			failure_summary,
 			severity,
+			impact,
 			standard,
 			criterion,
-			method
+			method,
+			help_url,
+			tags_json,
+			targets_json,
+			raw_json
 		FROM scan_findings
 		ORDER BY scan_id, sort_order
 	`)
@@ -681,23 +730,36 @@ func (s *Service) loadScans(ctx context.Context) error {
 
 	for findingsRows.Next() {
 		var (
-			scanID  string
-			finding Finding
+			scanID      string
+			finding     Finding
+			tagsJSON    string
+			targetsJSON string
 		)
 
 		if err := findingsRows.Scan(
 			&scanID,
 			&finding.ID,
+			&finding.RuleID,
 			&finding.Title,
 			&finding.Description,
 			&finding.Snippet,
+			&finding.NodeHTML,
+			&finding.Failure,
 			&finding.Severity,
+			&finding.Impact,
 			&finding.Standard,
 			&finding.Criterion,
 			&finding.Method,
+			&finding.HelpURL,
+			&tagsJSON,
+			&targetsJSON,
+			&finding.RawJSON,
 		); err != nil {
 			return fmt.Errorf("scan finding row: %w", err)
 		}
+
+		finding.Tags = parseStringJSONArray(tagsJSON)
+		finding.Targets = parseStringJSONArray(targetsJSON)
 
 		scan := s.scansByID[scanID]
 		if scan == nil {
@@ -732,12 +794,12 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 			requested_by_email,
 			type,
 			target,
-				standard,
-				device_emulation,
-				include_visual_contrast,
-				include_sub_pages,
-				include_best_practices,
-				status,
+			standard,
+			device_emulation,
+			include_visual_contrast,
+			include_sub_pages,
+			include_best_practices,
+			status,
 			progress,
 			stage,
 			error_message,
@@ -752,22 +814,23 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 			summary_critical,
 			summary_serious,
 			summary_moderate,
+			axe_raw_json,
 			evidence_desktop_image_url,
 			evidence_tablet_image_url,
 			evidence_mobile_image_url,
 			evidence_recording_image_url
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-			ON CONFLICT(id) DO UPDATE SET
-				owner_user_id = excluded.owner_user_id,
-				requested_by_email = excluded.requested_by_email,
-				type = excluded.type,
-				target = excluded.target,
-				standard = excluded.standard,
-				device_emulation = excluded.device_emulation,
-				include_visual_contrast = excluded.include_visual_contrast,
-				include_sub_pages = excluded.include_sub_pages,
-				include_best_practices = excluded.include_best_practices,
-				status = excluded.status,
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			owner_user_id = excluded.owner_user_id,
+			requested_by_email = excluded.requested_by_email,
+			type = excluded.type,
+			target = excluded.target,
+			standard = excluded.standard,
+			device_emulation = excluded.device_emulation,
+			include_visual_contrast = excluded.include_visual_contrast,
+			include_sub_pages = excluded.include_sub_pages,
+			include_best_practices = excluded.include_best_practices,
+			status = excluded.status,
 			progress = excluded.progress,
 			stage = excluded.stage,
 			error_message = excluded.error_message,
@@ -782,6 +845,7 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 			summary_critical = excluded.summary_critical,
 			summary_serious = excluded.summary_serious,
 			summary_moderate = excluded.summary_moderate,
+			axe_raw_json = excluded.axe_raw_json,
 			evidence_desktop_image_url = excluded.evidence_desktop_image_url,
 			evidence_tablet_image_url = excluded.evidence_tablet_image_url,
 			evidence_mobile_image_url = excluded.evidence_mobile_image_url,
@@ -812,6 +876,7 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 		scan.Summary.Critical,
 		scan.Summary.Serious,
 		scan.Summary.Moderate,
+		scan.AxeRaw,
 		scan.Evidence.DesktopImageURL,
 		scan.Evidence.TabletImageURL,
 		scan.Evidence.MobileImageURL,
@@ -826,29 +891,48 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 	}
 
 	for index, finding := range scan.Findings {
+		tagsJSON := marshalStringJSONArray(finding.Tags)
+		targetsJSON := marshalStringJSONArray(finding.Targets)
+
 		_, err := tx.Exec(`
 			INSERT INTO scan_findings (
 				scan_id,
 				finding_id,
+				rule_id,
 				title,
 				description,
 				snippet,
+				node_html,
+				failure_summary,
 				severity,
+				impact,
 				standard,
 				criterion,
 				method,
+				help_url,
+				tags_json,
+				targets_json,
+				raw_json,
 				sort_order
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`,
 			scan.ID,
 			finding.ID,
+			finding.RuleID,
 			finding.Title,
 			finding.Description,
 			finding.Snippet,
+			finding.NodeHTML,
+			finding.Failure,
 			string(finding.Severity),
+			finding.Impact,
 			finding.Standard,
 			finding.Criterion,
 			string(finding.Method),
+			finding.HelpURL,
+			tagsJSON,
+			targetsJSON,
+			finding.RawJSON,
 			index,
 		)
 		if err != nil {
@@ -992,10 +1076,54 @@ func removeScanID(scanIDs []string, scanID string) []string {
 	return filtered
 }
 
-func (s *Service) ensureScansColumn(ctx context.Context, columnName string, columnDDL string) error {
-	rows, err := s.db.QueryContext(ctx, `PRAGMA table_info(scans)`)
+func cloneFindings(findings []Finding) []Finding {
+	cloned := make([]Finding, 0, len(findings))
+	for _, finding := range findings {
+		copyFinding := finding
+		copyFinding.Tags = slices.Clone(finding.Tags)
+		copyFinding.Targets = slices.Clone(finding.Targets)
+		cloned = append(cloned, copyFinding)
+	}
+	return cloned
+}
+
+func marshalStringJSONArray(values []string) string {
+	if len(values) == 0 {
+		return "[]"
+	}
+	raw, err := json.Marshal(values)
 	if err != nil {
-		return fmt.Errorf("read scans table info: %w", err)
+		return "[]"
+	}
+	return string(raw)
+}
+
+func parseStringJSONArray(value string) []string {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return []string{}
+	}
+
+	var parsed []string
+	if err := json.Unmarshal([]byte(trimmed), &parsed); err != nil {
+		return []string{}
+	}
+	return parsed
+}
+
+func (s *Service) ensureScansColumn(ctx context.Context, columnName string, columnDDL string) error {
+	return s.ensureTableColumn(ctx, "scans", columnName, columnDDL)
+}
+
+func (s *Service) ensureScanFindingsColumn(ctx context.Context, columnName string, columnDDL string) error {
+	return s.ensureTableColumn(ctx, "scan_findings", columnName, columnDDL)
+}
+
+func (s *Service) ensureTableColumn(ctx context.Context, tableName string, columnName string, columnDDL string) error {
+	query := fmt.Sprintf("PRAGMA table_info(%s)", tableName)
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("read %s table info: %w", tableName, err)
 	}
 	defer rows.Close()
 
@@ -1009,7 +1137,7 @@ func (s *Service) ensureScansColumn(ctx context.Context, columnName string, colu
 			pk         int
 		)
 		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultVal, &pk); err != nil {
-			return fmt.Errorf("scan table info row: %w", err)
+			return fmt.Errorf("scan %s table info row: %w", tableName, err)
 		}
 
 		if strings.EqualFold(strings.TrimSpace(name), strings.TrimSpace(columnName)) {
@@ -1017,12 +1145,12 @@ func (s *Service) ensureScansColumn(ctx context.Context, columnName string, colu
 		}
 	}
 	if err := rows.Err(); err != nil {
-		return fmt.Errorf("iterate scans table info: %w", err)
+		return fmt.Errorf("iterate %s table info: %w", tableName, err)
 	}
 
-	statement := fmt.Sprintf("ALTER TABLE scans ADD COLUMN %s %s", columnName, columnDDL)
+	statement := fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", tableName, columnName, columnDDL)
 	if _, err := s.db.ExecContext(ctx, statement); err != nil {
-		return fmt.Errorf("add scans column %s: %w", columnName, err)
+		return fmt.Errorf("add %s column %s: %w", tableName, columnName, err)
 	}
 
 	return nil

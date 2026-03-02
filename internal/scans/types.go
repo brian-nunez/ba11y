@@ -50,13 +50,21 @@ const (
 
 type Finding struct {
 	ID          string
+	RuleID      string
 	Title       string
 	Description string
 	Snippet     string
+	NodeHTML    string
+	Failure     string
 	Severity    FindingSeverity
+	Impact      string
 	Standard    string
 	Criterion   string
 	Method      FindingMethod
+	HelpURL     string
+	Tags        []string
+	Targets     []string
+	RawJSON     string
 }
 
 type Summary struct {
@@ -102,6 +110,7 @@ type Scan struct {
 	Findings []Finding
 	Summary  Summary
 	Evidence Evidence
+	AxeRaw   string
 }
 
 type CreateScanInput struct {

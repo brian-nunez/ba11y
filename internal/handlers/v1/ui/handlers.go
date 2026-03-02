@@ -2,10 +2,13 @@ package uihandlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/brian-nunez/ba11y/internal/auth"
 	"github.com/brian-nunez/ba11y/internal/scans"
@@ -193,6 +196,47 @@ func (h *Handler) ScanReport(c echo.Context) error {
 	}
 
 	return h.render(c, pages.ScanReportPage(sessionView(c), currentUser, scan))
+}
+
+func (h *Handler) ExportScanReport(c echo.Context) error {
+	currentUser, ok := getCurrentUser(c)
+	if !ok {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
+
+	scan, err := h.scanService.GetScanForUser(c.Request().Context(), currentUser, c.Param("scanId"))
+	if err != nil {
+		if errors.Is(err, scans.ErrScanNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		if errors.Is(err, scans.ErrForbidden) {
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		}
+		return err
+	}
+
+	payload := map[string]any{
+		"exportedAt": time.Now().UTC().Format(time.RFC3339Nano),
+		"scan":       scan,
+	}
+
+	if trimmed := strings.TrimSpace(scan.AxeRaw); trimmed != "" {
+		var raw any
+		if err := json.Unmarshal([]byte(trimmed), &raw); err == nil {
+			payload["axe"] = raw
+		}
+		payload["axeRawJSON"] = trimmed
+	}
+
+	reportBytes, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal export report: %w", err)
+	}
+
+	filename := fmt.Sprintf("scan-%s-report.json", scan.ID)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
+	c.Response().Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	return c.Blob(http.StatusOK, echo.MIMEApplicationJSONCharsetUTF8, reportBytes)
 }
 
 func (h *Handler) CancelScan(c echo.Context) error {
