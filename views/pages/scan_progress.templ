@@ -43,7 +43,7 @@ templ ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Sc
 						<div class="relative">
 							<div class="absolute inset-0 animate-pulse rounded-full bg-[#137fec]/20 blur-2xl"></div>
 							<div class="relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#137fec]/20 bg-white">
-								<span class="material-symbols-outlined animate-spin text-4xl text-[#137fec]" style="animation-duration: 3s;">progress_activity</span>
+								<span id="activity-icon" class="material-symbols-outlined animate-spin text-4xl text-[#137fec]" style="animation-duration: 3s;">progress_activity</span>
 							</div>
 						</div>
 						<div class="space-y-1 text-center">
@@ -52,12 +52,24 @@ templ ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Sc
 						</div>
 					</div>
 
-					if scan.Status == scans.ScanStatusFailed {
-						<div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-							<p class="font-semibold">Scan failed</p>
-							<p>{ scan.ErrorMessage }</p>
-						</div>
-					}
+					<div id="error-panel" class={ templ.KV("hidden", scan.Status != scans.ScanStatusFailed && scan.Status != scans.ScanStatusCanceled), "rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" }>
+						<p id="error-title" class="font-semibold">
+							if scan.Status == scans.ScanStatusCanceled {
+								Scan canceled
+							} else {
+								Scan failed
+							}
+						</p>
+						<p id="error-message">
+							if scan.ErrorMessage != "" {
+								{ scan.ErrorMessage }
+							} else if scan.Status == scans.ScanStatusCanceled {
+								Canceled by user
+							} else {
+								Unexpected failure while processing scan.
+							}
+						</p>
+					</div>
 
 					<div class="mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-8 sm:flex-row">
 						<div class="flex items-center gap-2 text-slate-400">
@@ -65,7 +77,7 @@ templ ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Sc
 							<span class="text-xs italic font-medium">Our engine is auditing your content for accessibility standards...</span>
 						</div>
 						<form action={ "/scans/" + scan.ID + "/cancel" } method="post">
-							<button class="w-full rounded-lg border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 sm:w-auto" type="submit">Cancel Scan</button>
+							<button id="cancel-scan-button" class="w-full rounded-lg border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 sm:w-auto" type="submit">Cancel Scan</button>
 						</form>
 					</div>
 				</div>
@@ -91,6 +103,11 @@ templ ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Sc
 				const progressLabel = document.getElementById("progress-label");
 				const stageLabel = document.getElementById("stage-label");
 				const etaSeconds = document.getElementById("eta-seconds");
+				const activityIcon = document.getElementById("activity-icon");
+				const errorPanel = document.getElementById("error-panel");
+				const errorTitle = document.getElementById("error-title");
+				const errorMessage = document.getElementById("error-message");
+				const cancelScanButton = document.getElementById("cancel-scan-button");
 
 				async function refresh() {
 					try {
@@ -114,6 +131,32 @@ templ ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Sc
 						}
 						if (data.status === "completed") {
 							window.location.href = reportURL;
+							return;
+						}
+						if (data.status === "failed" || data.status === "canceled") {
+							if (activityIcon) {
+								activityIcon.classList.remove("animate-spin");
+								activityIcon.textContent = data.status === "failed" ? "error" : "block";
+								activityIcon.classList.remove("text-[#137fec]");
+								activityIcon.classList.add(data.status === "failed" ? "text-red-500" : "text-slate-500");
+							}
+							if (errorPanel) {
+								errorPanel.classList.remove("hidden");
+							}
+							if (errorTitle) {
+								errorTitle.textContent = data.status === "failed" ? "Scan failed" : "Scan canceled";
+							}
+							if (errorMessage) {
+								errorMessage.textContent = data.errorMessage && data.errorMessage.trim() !== ""
+									? data.errorMessage
+									: data.status === "failed"
+										? "Unexpected failure while processing scan."
+										: "Canceled by user";
+							}
+							if (cancelScanButton) {
+								cancelScanButton.disabled = true;
+								cancelScanButton.classList.add("opacity-60", "cursor-not-allowed");
+							}
 							return;
 						}
 					} catch (_) {
