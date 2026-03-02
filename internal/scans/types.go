@@ -16,7 +16,7 @@ const (
 func ParseScanType(raw string) (ScanType, error) {
 	scanType := ScanType(strings.ToLower(strings.TrimSpace(raw)))
 	switch scanType {
-	case ScanTypeWebPage, ScanTypeEmail:
+	case ScanTypeWebPage:
 		return scanType, nil
 	default:
 		return "", fmt.Errorf("unsupported scan type: %s", raw)
@@ -83,6 +83,7 @@ type Scan struct {
 	DeviceEmulation       string
 	IncludeVisualContrast bool
 	IncludeSubPages       bool
+	IncludeBestPractices  bool
 
 	Status       ScanStatus
 	Progress     int
@@ -112,6 +113,7 @@ type CreateScanInput struct {
 	DeviceEmulation       string
 	IncludeVisualContrast bool
 	IncludeSubPages       bool
+	IncludeBestPractices  bool
 }
 
 type StatusPayload struct {

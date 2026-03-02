@@ -151,7 +151,7 @@ func (s *Service) CreateScan(ctx context.Context, actor auth.User, input CreateS
 
 	device := strings.TrimSpace(input.DeviceEmulation)
 	if device == "" {
-		device = "Desktop (Chrome)"
+		device = "Desktop"
 	}
 
 	scan := &Scan{
@@ -164,6 +164,7 @@ func (s *Service) CreateScan(ctx context.Context, actor auth.User, input CreateS
 		DeviceEmulation:       device,
 		IncludeVisualContrast: input.IncludeVisualContrast,
 		IncludeSubPages:       input.IncludeSubPages,
+		IncludeBestPractices:  input.IncludeBestPractices,
 		Status:                ScanStatusPending,
 		Progress:              6,
 		Stage:                 "Queued for scanning",
@@ -483,6 +484,7 @@ func (s *Service) ensureSchema(ctx context.Context) error {
 			device_emulation TEXT NOT NULL,
 			include_visual_contrast INTEGER NOT NULL,
 			include_sub_pages INTEGER NOT NULL,
+			include_best_practices INTEGER NOT NULL DEFAULT 0,
 			status TEXT NOT NULL,
 			progress INTEGER NOT NULL,
 			stage TEXT NOT NULL,
@@ -531,6 +533,10 @@ func (s *Service) ensureSchema(ctx context.Context) error {
 		}
 	}
 
+	if err := s.ensureScansColumn(ctx, "include_best_practices", "INTEGER NOT NULL DEFAULT 0"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -549,6 +555,7 @@ func (s *Service) loadScans(ctx context.Context) error {
 			device_emulation,
 			include_visual_contrast,
 			include_sub_pages,
+			include_best_practices,
 			status,
 			progress,
 			stage,
@@ -583,6 +590,7 @@ func (s *Service) loadScans(ctx context.Context) error {
 		var (
 			includeVisualContrast int
 			includeSubPages       int
+			includeBestPractices  int
 			startedAt             sql.NullString
 			finishedAt            sql.NullString
 			createdAtRaw          string
@@ -599,6 +607,7 @@ func (s *Service) loadScans(ctx context.Context) error {
 			&scan.DeviceEmulation,
 			&includeVisualContrast,
 			&includeSubPages,
+			&includeBestPractices,
 			&scan.Status,
 			&scan.Progress,
 			&scan.Stage,
@@ -638,6 +647,7 @@ func (s *Service) loadScans(ctx context.Context) error {
 
 		scan.IncludeVisualContrast = intToBool(includeVisualContrast)
 		scan.IncludeSubPages = intToBool(includeSubPages)
+		scan.IncludeBestPractices = intToBool(includeBestPractices)
 		scan.Evidence = normalizeEvidence(scan.Evidence)
 		scan.Findings = make([]Finding, 0)
 
@@ -722,11 +732,12 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 			requested_by_email,
 			type,
 			target,
-			standard,
-			device_emulation,
-			include_visual_contrast,
-			include_sub_pages,
-			status,
+				standard,
+				device_emulation,
+				include_visual_contrast,
+				include_sub_pages,
+				include_best_practices,
+				status,
 			progress,
 			stage,
 			error_message,
@@ -745,17 +756,18 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 			evidence_tablet_image_url,
 			evidence_mobile_image_url,
 			evidence_recording_image_url
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		ON CONFLICT(id) DO UPDATE SET
-			owner_user_id = excluded.owner_user_id,
-			requested_by_email = excluded.requested_by_email,
-			type = excluded.type,
-			target = excluded.target,
-			standard = excluded.standard,
-			device_emulation = excluded.device_emulation,
-			include_visual_contrast = excluded.include_visual_contrast,
-			include_sub_pages = excluded.include_sub_pages,
-			status = excluded.status,
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT(id) DO UPDATE SET
+				owner_user_id = excluded.owner_user_id,
+				requested_by_email = excluded.requested_by_email,
+				type = excluded.type,
+				target = excluded.target,
+				standard = excluded.standard,
+				device_emulation = excluded.device_emulation,
+				include_visual_contrast = excluded.include_visual_contrast,
+				include_sub_pages = excluded.include_sub_pages,
+				include_best_practices = excluded.include_best_practices,
+				status = excluded.status,
 			progress = excluded.progress,
 			stage = excluded.stage,
 			error_message = excluded.error_message,
@@ -784,6 +796,7 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 		scan.DeviceEmulation,
 		boolToInt(scan.IncludeVisualContrast),
 		boolToInt(scan.IncludeSubPages),
+		boolToInt(scan.IncludeBestPractices),
 		string(scan.Status),
 		scan.Progress,
 		scan.Stage,
@@ -977,4 +990,40 @@ func removeScanID(scanIDs []string, scanID string) []string {
 	}
 
 	return filtered
+}
+
+func (s *Service) ensureScansColumn(ctx context.Context, columnName string, columnDDL string) error {
+	rows, err := s.db.QueryContext(ctx, `PRAGMA table_info(scans)`)
+	if err != nil {
+		return fmt.Errorf("read scans table info: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			cid        int
+			name       string
+			columnType string
+			notNull    int
+			defaultVal sql.NullString
+			pk         int
+		)
+		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultVal, &pk); err != nil {
+			return fmt.Errorf("scan table info row: %w", err)
+		}
+
+		if strings.EqualFold(strings.TrimSpace(name), strings.TrimSpace(columnName)) {
+			return nil
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("iterate scans table info: %w", err)
+	}
+
+	statement := fmt.Sprintf("ALTER TABLE scans ADD COLUMN %s %s", columnName, columnDDL)
+	if _, err := s.db.ExecContext(ctx, statement); err != nil {
+		return fmt.Errorf("add scans column %s: %w", columnName, err)
+	}
+
+	return nil
 }

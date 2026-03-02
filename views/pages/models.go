@@ -14,21 +14,17 @@ type SessionView struct {
 }
 
 type ScanFormView struct {
-	SelectedType          string
-	Target                string
-	Standard              string
-	DeviceEmulation       string
-	IncludeVisualContrast bool
-	IncludeSubPages       bool
+	SelectedType         string
+	Target               string
+	Standard             string
+	IncludeBestPractices bool
 }
 
 func DefaultScanForm() ScanFormView {
 	return ScanFormView{
-		SelectedType:          string(scans.ScanTypeWebPage),
-		Standard:              "WCAG 2.1 Level AA",
-		DeviceEmulation:       "Desktop (Chrome)",
-		IncludeVisualContrast: true,
-		IncludeSubPages:       false,
+		SelectedType:         string(scans.ScanTypeWebPage),
+		Standard:             "WCAG 2.1 Level AA",
+		IncludeBestPractices: false,
 	}
 }
 
@@ -38,19 +34,12 @@ func (f ScanFormView) IsSelected(scanType scans.ScanType) bool {
 
 func StandardOptions() []string {
 	return []string{
-		"WCAG 2.1 Level AA",
-		"WCAG 2.1 Level AAA",
+		"WCAG 2.0 Level A",
 		"WCAG 2.0 Level AA",
-		"Section 508",
-	}
-}
-
-func DeviceOptions() []string {
-	return []string{
-		"Desktop (Chrome)",
-		"Mobile (iPhone 13)",
-		"Mobile (Android Pixel 6)",
-		"Tablet (iPad Air)",
+		"WCAG 2.0 Level AAA",
+		"WCAG 2.1 Level A",
+		"WCAG 2.1 Level AA",
+		"WCAG 2.2 Level AA",
 	}
 }
 
@@ -138,17 +127,17 @@ func ScanProgressLabel(scan scans.Scan) string {
 }
 
 func ScanTypeCardClass(selected bool) string {
-	base := "group relative flex cursor-pointer flex-col gap-3 rounded-xl border-2 bg-white p-4 pb-3 transition-all hover:shadow-md"
+	base := "group relative flex cursor-pointer items-center gap-2 rounded-lg border bg-white px-3 py-2 transition-colors"
 	if selected {
-		return base + " border-[#137fec]"
+		return base + " border-[#137fec] text-[#137fec]"
 	}
-	return base + " border-slate-200 hover:border-[#137fec]/50"
+	return base + " border-slate-200 text-slate-600 hover:border-[#137fec]/40"
 }
 
 func ScanTypeIconClass(selected bool) string {
-	base := "aspect-square w-full rounded-lg flex items-center justify-center"
+	base := "size-6 rounded-md flex items-center justify-center"
 	if selected {
-		return base + " bg-[#137fec]/10 text-[#137fec]"
+		return base + " bg-[#137fec]/15 text-[#137fec]"
 	}
 	return base + " bg-slate-100 text-slate-500"
 }

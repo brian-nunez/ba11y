@@ -119,9 +119,10 @@ func (h *Handler) CreateScan(c echo.Context) error {
 		Type:                  scanType,
 		Target:                form.Target,
 		Standard:              form.Standard,
-		DeviceEmulation:       form.DeviceEmulation,
-		IncludeVisualContrast: form.IncludeVisualContrast,
-		IncludeSubPages:       form.IncludeSubPages,
+		DeviceEmulation:       "Desktop",
+		IncludeVisualContrast: false,
+		IncludeSubPages:       false,
+		IncludeBestPractices:  form.IncludeBestPractices,
 	}
 
 	scan, err := h.scanService.CreateScan(c.Request().Context(), currentUser, input)
@@ -263,12 +264,10 @@ func scanFormFromRequest(c echo.Context) pages.ScanFormView {
 	form.SelectedType = strings.TrimSpace(c.FormValue("scan_type"))
 	form.Target = strings.TrimSpace(c.FormValue("target"))
 	form.Standard = strings.TrimSpace(c.FormValue("standard"))
-	form.DeviceEmulation = strings.TrimSpace(c.FormValue("device_emulation"))
-	form.IncludeVisualContrast = c.FormValue("include_visual_contrast") != ""
-	form.IncludeSubPages = c.FormValue("include_subpages") != ""
+	form.IncludeBestPractices = c.FormValue("include_best_practices") != ""
 
 	if form.Target == "" {
-		for _, key := range []string{"website_url", "email_content"} {
+		for _, key := range []string{"website_url"} {
 			value := strings.TrimSpace(c.FormValue(key))
 			if value != "" {
 				form.Target = value
@@ -277,7 +276,7 @@ func scanFormFromRequest(c echo.Context) pages.ScanFormView {
 		}
 	}
 
-	if form.SelectedType == "" {
+	if form.SelectedType == "" || !strings.EqualFold(form.SelectedType, string(scans.ScanTypeWebPage)) {
 		form.SelectedType = string(scans.ScanTypeWebPage)
 	}
 

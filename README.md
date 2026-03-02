@@ -4,9 +4,9 @@
 
 It supports scans for:
 - Web pages
-- Emails
 
 Currently disabled:
+- Emails
 - PDF documents
 - Multi-step user journeys
 

@@ -114,7 +114,7 @@ func (t *scanTask) Process(ctx context.Context, pc *worker.ProcessContext) error
 	}
 
 	t.service.updateStage(t.scanID, 70, "Running axe-core accessibility checks")
-	findings, err := runAxeAudit(page, scan.Standard)
+	findings, err := runAxeAudit(page, scan.Standard, scan.IncludeBestPractices)
 	if err != nil {
 		if t.isCanceled() {
 			t.service.setWorkerStatus(t.scanID, "canceled")

@@ -39,7 +39,7 @@ func installPlaywrightDriver() error {
 	return playwright.Install(&playwright.RunOptions{SkipInstallBrowsers: true})
 }
 
-func runAxeAudit(page playwright.Page, standard string) ([]Finding, error) {
+func runAxeAudit(page playwright.Page, standard string, includeBestPractices bool) ([]Finding, error) {
 	if _, err := page.AddScriptTag(playwright.PageAddScriptTagOptions{
 		URL: playwright.String(axeCoreCDNURL),
 	}); err != nil {
@@ -74,7 +74,7 @@ func runAxeAudit(page playwright.Page, standard string) ([]Finding, error) {
 			})),
 		};
 	}`, map[string]any{
-		"tags": standardToAxeTags(standard),
+		"tags": standardToAxeTags(standard, includeBestPractices),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("run axe-core: %w", err)
@@ -234,17 +234,45 @@ func looksLikeHTML(value string) bool {
 	return strings.Contains(lower, "<html") || strings.Contains(lower, "<body") || strings.Contains(lower, "<!doctype") || (strings.Contains(lower, "<") && strings.Contains(lower, ">"))
 }
 
-func standardToAxeTags(standard string) []string {
-	switch strings.ToLower(strings.TrimSpace(standard)) {
-	case strings.ToLower("WCAG 2.1 Level AAA"):
-		return []string{"wcag2a", "wcag2aa", "wcag2aaa", "wcag21a", "wcag21aa", "wcag21aaa"}
-	case strings.ToLower("WCAG 2.0 Level AA"):
-		return []string{"wcag2a", "wcag2aa"}
-	case strings.ToLower("Section 508"):
-		return []string{"section508"}
-	default:
-		return []string{"wcag2a", "wcag2aa", "wcag21a", "wcag21aa"}
+func standardToAxeTags(standard string, includeBestPractices bool) []string {
+	seen := map[string]struct{}{}
+	tags := make([]string, 0)
+	add := func(values ...string) {
+		for _, value := range values {
+			tag := strings.TrimSpace(strings.ToLower(value))
+			if tag == "" {
+				continue
+			}
+			if _, ok := seen[tag]; ok {
+				continue
+			}
+			seen[tag] = struct{}{}
+			tags = append(tags, tag)
+		}
 	}
+
+	switch strings.ToLower(strings.TrimSpace(standard)) {
+	case strings.ToLower("WCAG 2.0 Level A"):
+		add("wcag2a")
+	case strings.ToLower("WCAG 2.0 Level AA"):
+		add("wcag2a", "wcag2aa")
+	case strings.ToLower("WCAG 2.0 Level AAA"):
+		add("wcag2a", "wcag2aa", "wcag2aaa")
+	case strings.ToLower("WCAG 2.1 Level A"):
+		add("wcag2a", "wcag21a")
+	case strings.ToLower("WCAG 2.2 Level AA"):
+		add("wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa")
+	case strings.ToLower("WCAG 2.1 Level AA"):
+		add("wcag2a", "wcag2aa", "wcag21a", "wcag21aa")
+	default:
+		add("wcag2a", "wcag2aa", "wcag21a", "wcag21aa")
+	}
+
+	if includeBestPractices {
+		add("best-practice")
+	}
+
+	return tags
 }
 
 func mapAxeViolationsToFindings(violations []axeViolation, standard string) []Finding {
