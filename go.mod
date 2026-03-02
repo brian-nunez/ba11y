@@ -9,11 +9,15 @@ require (
 	github.com/brian-nunez/bbaas-api v0.0.0-20260301044228-89abb25c869e
 	github.com/brian-nunez/task-orchestration v0.0.6
 	github.com/labstack/echo/v4 v4.13.4
+	github.com/playwright-community/playwright-go v0.5700.1
 	golang.org/x/crypto v0.38.0
 )
 
 require (
+	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
+	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect

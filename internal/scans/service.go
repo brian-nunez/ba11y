@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"os"
 	"slices"
 	"strings"
 	"sync"
@@ -45,6 +46,11 @@ type Service struct {
 }
 
 func NewService(config Config, authorizer *authorization.ScanAuthorizer) (*Service, error) {
+	_ = os.Setenv("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")
+	if err := installPlaywrightDriver(); err != nil {
+		return nil, fmt.Errorf("install playwright driver: %w", err)
+	}
+
 	baseURL := strings.TrimSpace(config.BBAASBaseURL)
 	if baseURL == "" {
 		baseURL = "http://127.0.0.1:8080"
@@ -364,6 +370,18 @@ func (s *Service) completeScan(scanID string, findings []Finding) {
 	scan.Summary = summary
 	scan.FinishedAt = &now
 	scan.ErrorMessage = ""
+}
+
+func (s *Service) setEvidence(scanID string, evidence Evidence) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	scan := s.scansByID[scanID]
+	if scan == nil {
+		return
+	}
+
+	scan.Evidence = evidence
 }
 
 func (s *Service) getScanForTask(scanID string) (Scan, error) {

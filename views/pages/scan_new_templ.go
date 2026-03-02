@@ -109,7 +109,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<form action=\"/scans\" method=\"post\"><div class=\"grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<form action=\"/scans\" method=\"post\"><div class=\"grid grid-cols-1 gap-4 p-4 sm:grid-cols-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -217,240 +217,132 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\"><span class=\"material-symbols-outlined text-5xl\">alternate_email</span></div><div><p class=\"text-base font-bold\">Email</p><p class=\"text-xs text-slate-500\">Upload HTML or paste email text content</p></div></label> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\"><span class=\"material-symbols-outlined text-5xl\">alternate_email</span></div><div><p class=\"text-base font-bold\">Email</p><p class=\"text-xs text-slate-500\">Upload HTML or paste email text content</p></div></label></div><div class=\"mt-8 rounded-xl border border-slate-200 bg-white p-4\"><h3 class=\"mb-4 flex items-center gap-2 text-lg font-bold\"><span class=\"material-symbols-outlined\">settings</span> Scan Configuration</h3><div class=\"space-y-6\"><div class=\"flex flex-col gap-2\"><label class=\"text-sm font-medium text-slate-700\">Asset Target</label><div class=\"relative\"><span class=\"absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400\"><span class=\"material-symbols-outlined text-sm\">link</span></span> <input type=\"text\" name=\"target\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var14 = []any{ScanTypeCardClass(form.IsSelected(scans.ScanTypePDF))}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var14...)
+			var templ_7745c5c3_Var14 string
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(form.Target)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 66, Col: 63}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<label class=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var14).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\"><input type=\"radio\" class=\"absolute right-4 top-4 h-5 w-5 text-[#137fec] focus:ring-[#137fec]\" name=\"scan_type\" value=\"pdf\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if form.IsSelected(scans.ScanTypePDF) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, " checked")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, ">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var16 = []any{ScanTypeIconClass(form.IsSelected(scans.ScanTypePDF))}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var16...)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var17 string
-			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var16).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"><span class=\"material-symbols-outlined text-5xl\">picture_as_pdf</span></div><div><p class=\"text-base font-bold\">PDF Document</p><p class=\"text-xs text-slate-500\">Analyze tagging, reading order, and contrast</p></div></label> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var18 = []any{ScanTypeCardClass(form.IsSelected(scans.ScanTypeJourney))}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var18...)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<label class=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var19 string
-			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var18).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\"><input type=\"radio\" class=\"absolute right-4 top-4 h-5 w-5 text-[#137fec] focus:ring-[#137fec]\" name=\"scan_type\" value=\"journey\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if form.IsSelected(scans.ScanTypeJourney) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, " checked")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, ">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var20 = []any{ScanTypeIconClass(form.IsSelected(scans.ScanTypeJourney))}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var20...)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var21 string
-			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var20).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\"><span class=\"material-symbols-outlined text-5xl\">linear_scale</span></div><div><p class=\"text-base font-bold\">User Journey</p><p class=\"text-xs text-slate-500\">Test multi-step workflows like checkouts</p></div></label></div><div class=\"mt-8 rounded-xl border border-slate-200 bg-white p-4\"><h3 class=\"mb-4 flex items-center gap-2 text-lg font-bold\"><span class=\"material-symbols-outlined\">settings</span> Scan Configuration</h3><div class=\"space-y-6\"><div class=\"flex flex-col gap-2\"><label class=\"text-sm font-medium text-slate-700\">Asset Target</label><div class=\"relative\"><span class=\"absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400\"><span class=\"material-symbols-outlined text-sm\">link</span></span> <input type=\"text\" name=\"target\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var22 string
-			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(form.Target)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 87, Col: 63}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" placeholder=\"https://example.com or paste HTML/text\" class=\"w-full rounded-lg border border-slate-300 bg-slate-50 py-3 pl-10 pr-4 outline-none transition-all focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20\"></div></div><div class=\"grid grid-cols-1 gap-6 md:grid-cols-2\"><div class=\"flex flex-col gap-2\"><label class=\"text-sm font-medium text-slate-700\">Standard</label> <select name=\"standard\" class=\"w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" placeholder=\"https://example.com or paste HTML/text\" class=\"w-full rounded-lg border border-slate-300 bg-slate-50 py-3 pl-10 pr-4 outline-none transition-all focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20\"></div></div><div class=\"grid grid-cols-1 gap-6 md:grid-cols-2\"><div class=\"flex flex-col gap-2\"><label class=\"text-sm font-medium text-slate-700\">Standard</label> <select name=\"standard\" class=\"w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, standard := range StandardOptions() {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<option value=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<option value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var23 string
-				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(standard)
+				var templ_7745c5c3_Var15 string
+				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(standard)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 95, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 74, Col: 37}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if standard == form.Standard {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, " selected")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, " selected")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, ">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, ">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var24 string
-				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(standard)
+				var templ_7745c5c3_Var16 string
+				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(standard)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 95, Col: 90}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 74, Col: 90}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</option>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</option>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</select></div><div class=\"flex flex-col gap-2\"><label class=\"text-sm font-medium text-slate-700\">Device Emulation</label> <select name=\"device_emulation\" class=\"w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</select></div><div class=\"flex flex-col gap-2\"><label class=\"text-sm font-medium text-slate-700\">Device Emulation</label> <select name=\"device_emulation\" class=\"w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, device := range DeviceOptions() {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<option value=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<option value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var25 string
-				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(device)
+				var templ_7745c5c3_Var17 string
+				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(device)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 103, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 82, Col: 35}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if device == form.DeviceEmulation {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, " selected")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, " selected")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, ">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, ">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var26 string
-				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(device)
+				var templ_7745c5c3_Var18 string
+				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(device)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 103, Col: 91}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 82, Col: 91}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "</option>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</option>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</select></div></div><div class=\"space-y-3 pt-2\"><label class=\"group flex cursor-pointer items-center gap-3\"><input type=\"checkbox\" name=\"include_visual_contrast\" class=\"h-5 w-5 rounded border-slate-300 text-[#137fec] focus:ring-[#137fec]\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</select></div></div><div class=\"space-y-3 pt-2\"><label class=\"group flex cursor-pointer items-center gap-3\"><input type=\"checkbox\" name=\"include_visual_contrast\" class=\"h-5 w-5 rounded border-slate-300 text-[#137fec] focus:ring-[#137fec]\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if form.IncludeVisualContrast {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, " checked")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, " checked")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "> <span class=\"text-sm text-slate-600 group-hover:text-slate-900\">Include visual contrast analysis (OCR)</span></label> <label class=\"group flex cursor-pointer items-center gap-3\"><input type=\"checkbox\" name=\"include_subpages\" class=\"h-5 w-5 rounded border-slate-300 text-[#137fec] focus:ring-[#137fec]\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "> <span class=\"text-sm text-slate-600 group-hover:text-slate-900\">Include visual contrast analysis (OCR)</span></label> <label class=\"group flex cursor-pointer items-center gap-3\"><input type=\"checkbox\" name=\"include_subpages\" class=\"h-5 w-5 rounded border-slate-300 text-[#137fec] focus:ring-[#137fec]\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if form.IncludeSubPages {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, " checked")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, " checked")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "> <span class=\"text-sm text-slate-600 group-hover:text-slate-900\">Scan sub-pages (Up to 5 levels)</span></label></div></div></div><div class=\"mt-8 flex items-center justify-between px-4\"><a href=\"/\" class=\"px-6 py-3 font-bold text-slate-600 hover:text-slate-900\">Cancel</a><div class=\"flex gap-4\"><button type=\"button\" class=\"flex items-center gap-2 rounded-lg bg-slate-200 px-6 py-3 font-bold text-slate-700 hover:bg-slate-300\"><span class=\"material-symbols-outlined\">save</span> Save Draft</button> <button type=\"submit\" class=\"flex items-center gap-2 rounded-lg bg-[#137fec] px-10 py-3 font-bold text-white shadow-lg shadow-[#137fec]/20 hover:bg-[#0f72d6]\">Run Scan <span class=\"material-symbols-outlined\">rocket_launch</span></button></div></div></form></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "> <span class=\"text-sm text-slate-600 group-hover:text-slate-900\">Scan sub-pages (Up to 5 levels)</span></label></div></div></div><div class=\"mt-8 flex items-center justify-between px-4\"><a href=\"/\" class=\"px-6 py-3 font-bold text-slate-600 hover:text-slate-900\">Cancel</a><div class=\"flex gap-4\"><button type=\"button\" class=\"flex items-center gap-2 rounded-lg bg-slate-200 px-6 py-3 font-bold text-slate-700 hover:bg-slate-300\"><span class=\"material-symbols-outlined\">save</span> Save Draft</button> <button type=\"submit\" class=\"flex items-center gap-2 rounded-lg bg-[#137fec] px-10 py-3 font-bold text-white shadow-lg shadow-[#137fec]/20 hover:bg-[#0f72d6]\">Run Scan <span class=\"material-symbols-outlined\">rocket_launch</span></button></div></div></form></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -458,7 +350,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "</div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

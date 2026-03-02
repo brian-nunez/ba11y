@@ -1682,9 +1682,6 @@
   .text-\[\#137fec\]\/40 {
     color: color-mix(in oklab, #137fec 40%, transparent);
   }
-  .text-\[\#888\] {
-    color: #888;
-  }
   .text-accent-foreground {
     color: var(--accent-foreground);
   }
@@ -2914,11 +2911,6 @@
   .lg\:grid-cols-3 {
     @media (width >= 64rem) {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-  .lg\:grid-cols-4 {
-    @media (width >= 64rem) {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
   .lg\:flex-row {

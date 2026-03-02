@@ -60,10 +60,6 @@ func HumanScanType(scanType scans.ScanType) string {
 		return "Web Page"
 	case scans.ScanTypeEmail:
 		return "Email"
-	case scans.ScanTypePDF:
-		return "PDF Document"
-	case scans.ScanTypeJourney:
-		return "User Journey"
 	default:
 		return strings.Title(string(scanType))
 	}

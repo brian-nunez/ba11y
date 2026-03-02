@@ -28,7 +28,7 @@ templ NewScanPage(session SessionView, currentUser auth.User, recentScans []scan
 						}
 
 						<form action="/scans" method="post">
-							<div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
+							<div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2">
 								<label class={ ScanTypeCardClass(form.IsSelected(scans.ScanTypeWebPage)) }>
 									<input type="radio" class="absolute right-4 top-4 h-5 w-5 text-[#137fec] focus:ring-[#137fec]" name="scan_type" value="webpage" checked?={ form.IsSelected(scans.ScanTypeWebPage) }/>
 									<div class={ ScanTypeIconClass(form.IsSelected(scans.ScanTypeWebPage)) }>
@@ -51,27 +51,6 @@ templ NewScanPage(session SessionView, currentUser auth.User, recentScans []scan
 									</div>
 								</label>
 
-								<label class={ ScanTypeCardClass(form.IsSelected(scans.ScanTypePDF)) }>
-									<input type="radio" class="absolute right-4 top-4 h-5 w-5 text-[#137fec] focus:ring-[#137fec]" name="scan_type" value="pdf" checked?={ form.IsSelected(scans.ScanTypePDF) }/>
-									<div class={ ScanTypeIconClass(form.IsSelected(scans.ScanTypePDF)) }>
-										<span class="material-symbols-outlined text-5xl">picture_as_pdf</span>
-									</div>
-									<div>
-										<p class="text-base font-bold">PDF Document</p>
-										<p class="text-xs text-slate-500">Analyze tagging, reading order, and contrast</p>
-									</div>
-								</label>
-
-								<label class={ ScanTypeCardClass(form.IsSelected(scans.ScanTypeJourney)) }>
-									<input type="radio" class="absolute right-4 top-4 h-5 w-5 text-[#137fec] focus:ring-[#137fec]" name="scan_type" value="journey" checked?={ form.IsSelected(scans.ScanTypeJourney) }/>
-									<div class={ ScanTypeIconClass(form.IsSelected(scans.ScanTypeJourney)) }>
-										<span class="material-symbols-outlined text-5xl">linear_scale</span>
-									</div>
-									<div>
-										<p class="text-base font-bold">User Journey</p>
-										<p class="text-xs text-slate-500">Test multi-step workflows like checkouts</p>
-									</div>
-								</label>
 							</div>
 
 							<div class="mt-8 rounded-xl border border-slate-200 bg-white p-4">

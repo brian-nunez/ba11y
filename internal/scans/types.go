@@ -11,14 +11,12 @@ type ScanType string
 const (
 	ScanTypeWebPage ScanType = "webpage"
 	ScanTypeEmail   ScanType = "email"
-	ScanTypePDF     ScanType = "pdf"
-	ScanTypeJourney ScanType = "journey"
 )
 
 func ParseScanType(raw string) (ScanType, error) {
 	scanType := ScanType(strings.ToLower(strings.TrimSpace(raw)))
 	switch scanType {
-	case ScanTypeWebPage, ScanTypeEmail, ScanTypePDF, ScanTypeJourney:
+	case ScanTypeWebPage, ScanTypeEmail:
 		return scanType, nil
 	default:
 		return "", fmt.Errorf("unsupported scan type: %s", raw)

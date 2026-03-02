@@ -17,7 +17,7 @@ type AppConfig struct {
 func Load() AppConfig {
 	return AppConfig{
 		BBAASBaseURL:       envOrDefault("BBAAS_BASE_URL", "http://127.0.0.1:8080"),
-		BBAASAPIToken:      strings.TrimSpace(os.Getenv("BBAAS_API_TOKEN")),
+		BBAASAPIToken:      firstNonEmptyEnv("BBAAS_API_TOKEN", "BBAAS_API_KEY"),
 		WorkerConcurrency:  intEnvOrDefault("SCAN_WORKER_CONCURRENCY", 3),
 		WorkerLogPath:      envOrDefault("SCAN_WORKER_LOG_PATH", "./data/logs"),
 		WorkerDatabasePath: envOrDefault("SCAN_WORKER_DB_PATH", "./data/tasks.db"),
@@ -45,4 +45,14 @@ func intEnvOrDefault(key string, defaultValue int) int {
 	}
 
 	return parsed
+}
+
+func firstNonEmptyEnv(keys ...string) string {
+	for _, key := range keys {
+		value := strings.TrimSpace(os.Getenv(key))
+		if value != "" {
+			return value
+		}
+	}
+	return ""
 }

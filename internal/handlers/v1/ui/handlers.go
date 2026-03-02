@@ -268,7 +268,7 @@ func scanFormFromRequest(c echo.Context) pages.ScanFormView {
 	form.IncludeSubPages = c.FormValue("include_subpages") != ""
 
 	if form.Target == "" {
-		for _, key := range []string{"website_url", "email_content", "pdf_url", "journey_steps"} {
+		for _, key := range []string{"website_url", "email_content"} {
 			value := strings.TrimSpace(c.FormValue(key))
 			if value != "" {
 				form.Target = value

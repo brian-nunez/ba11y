@@ -5,6 +5,8 @@
 It supports scans for:
 - Web pages
 - Emails
+
+Currently disabled:
 - PDF documents
 - Multi-step user journeys
 
@@ -44,17 +46,20 @@ The auth/session flow follows the `bbaas-api` web flow pattern:
    - Spawn a browser (`SpawnBrowser`)
    - Keep session alive (`KeepAliveBrowser`)
    - Close browser (`CloseBrowser`)
-4. Progress is polled from `/api/v1/scans/:scanId/status`
-5. Completed scans render detailed reports at `/scans/:scanId/report`
+4. Worker connects to the spawned browser over CDP using `playwright-go`
+5. Worker injects and runs `axe-core` in-page and maps violations into findings
+6. Progress is polled from `/api/v1/scans/:scanId/status`
+7. Completed scans render detailed reports at `/scans/:scanId/report`
 
 ## Environment Variables
 
 - `PORT` (default: `8090`)
 - `BBAAS_BASE_URL` (default: `http://127.0.0.1:8080`)
-- `BBAAS_API_TOKEN` (required to run scans successfully)
+- `BBAAS_API_TOKEN` (preferred) or `BBAAS_API_KEY` (fallback; required to run scans)
 - `SCAN_WORKER_CONCURRENCY` (default: `3`)
 - `SCAN_WORKER_LOG_PATH` (default: `./data/logs`)
 - `SCAN_WORKER_DB_PATH` (default: `./data/tasks.db`)
+- `PLAYWRIGHT_DRIVER_PATH` (optional, custom driver path)
 
 ## Local Development
 
@@ -64,6 +69,10 @@ The auth/session flow follows the `bbaas-api` web flow pattern:
 - `templ`
 - `tailwindcss`
 - `air` (optional, for hot reload)
+
+Notes:
+- The app installs the Playwright driver automatically with `SkipInstallBrowsers=true`.
+- Browser binaries are not installed locally; scans run in your spawned BaaS browser via CDP.
 
 ### Install dependencies
 
@@ -98,4 +107,3 @@ UI routes:
 API routes:
 - `/api/v1/health`
 - `/api/v1/scans/:scanId/status`
-
