@@ -1,39 +1,24 @@
 services:
-  a11y:
-    build: .
+  ba11y:
+    image: briannunez/ba11y:latest
+    restart: unless-stopped
     ports:
-      - 8080:8080
-
-  minio:
-    image: quay.io/minio/minio
-    ports:
-      - 9000:9000
-      - 9001:9001
+      - "8090:8090"
+    environment:
+      PORT: "8090"
+      APP_DATABASE_PATH: "/data/ba11y.db"
+      SCAN_WORKER_DB_PATH: "/data/ba11y.db"
+      SCAN_WORKER_LOG_PATH: "/data/logs"
+      SCAN_WORKER_CONCURRENCY: "3"
+      BBAAS_BASE_URL: "https://bbaas.b8z.me"
+      BBAAS_API_TOKEN: "replace-with-your-bbaas-api-token"
+      BBAAS_API_KEY: ""
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
     volumes:
       - ./data:/data
-    environment:
-      - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=adminpassword
-    command: server /data --console-address ":9001"
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
-      interval: 5s
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/api/v1/health"]
+      interval: 30s
       timeout: 5s
-      retries: 5
-
-  createbuckets:
-    image: quay.io/minio/mc
-    depends_on:
-      minio:
-        condition: service_healthy
-    volumes:
-      - ./minio-external-files:/minio-external-files
-
-    entrypoint: >
-      /bin/sh -c "
-      sleep 5 &&
-      /usr/bin/mc alias set local http://minio:9000 admin adminpassword;
-      /usr/bin/mc mb local/a11y;
-      exit 0;
-      "
-
+      retries: 3
+      start_period: 20s
