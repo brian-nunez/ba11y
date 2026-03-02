@@ -73,10 +73,14 @@ templ ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan
 							</div>
 						</div>
 					</div>
-					<div class="mb-8">
-						<h3 class="mb-4 text-lg font-bold">Visual Evidence</h3>
-						<div class="grid gap-6 lg:grid-cols-3">
-							<div class="rounded-xl border border-[#137fec]/10 bg-white p-5 shadow-sm lg:col-span-2">
+						<div class="mb-8">
+							<h3 class="mb-4 text-lg font-bold">Visual Evidence</h3>
+							<div class="grid gap-6 lg:grid-cols-3">
+								<div class={
+									"rounded-xl border border-[#137fec]/10 bg-white p-5 shadow-sm",
+									templ.KV("lg:col-span-2", HasRecordingEvidence(scan)),
+									templ.KV("lg:col-span-3", !HasRecordingEvidence(scan)),
+								}>
 								<div class="mb-4 flex items-center gap-2">
 									<span class="material-symbols-outlined text-[20px] text-[#137fec]">grid_view</span>
 									<span class="font-bold">Responsive Screenshots</span>
@@ -114,18 +118,20 @@ templ ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan
 									</div>
 								</div>
 							</div>
-							<div class="flex flex-col rounded-xl border border-[#137fec]/10 bg-white p-5 shadow-sm">
-								<div class="mb-4 flex items-center gap-2">
-									<span class="material-symbols-outlined text-[20px] text-red-500">videocam</span>
-									<span class="font-bold">Scan Recording</span>
-								</div>
-								<div class="relative flex-1 overflow-hidden rounded-lg bg-slate-950">
-									<img alt="Scan recording" class="h-full w-full object-cover opacity-60" src={ scan.Evidence.RecordingImageURL }/>
-								</div>
-								<p class="mt-3 text-[11px] italic text-slate-500">Recording showing element interaction and automated scanner movement during Scan #{ scan.ID }.</p>
+								if HasRecordingEvidence(scan) {
+									<div class="flex flex-col rounded-xl border border-[#137fec]/10 bg-white p-5 shadow-sm">
+										<div class="mb-4 flex items-center gap-2">
+											<span class="material-symbols-outlined text-[20px] text-red-500">videocam</span>
+											<span class="font-bold">Scan Recording</span>
+										</div>
+										<div class="relative flex-1 overflow-hidden rounded-lg bg-slate-950">
+											<img alt="Scan recording" class="h-full w-full object-cover opacity-60" src={ scan.Evidence.RecordingImageURL }/>
+										</div>
+										<p class="mt-3 text-[11px] italic text-slate-500">Recording showing element interaction and automated scanner movement during Scan #{ scan.ID }.</p>
+									</div>
+								}
 							</div>
 						</div>
-					</div>
 					<div class="mb-4 text-sm text-slate-500">Showing <span class="font-bold text-slate-900">{ fmt.Sprint(scan.Summary.Total) }</span> violations</div>
 					<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 						<div class="overflow-x-auto">

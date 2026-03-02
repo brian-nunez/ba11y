@@ -157,3 +157,15 @@ func HistoryStatusClass(status scans.ScanStatus) string {
 		return base + " bg-slate-200 text-slate-700"
 	}
 }
+
+func HasRecordingEvidence(scan scans.Scan) bool {
+	recordingURL := strings.TrimSpace(scan.Evidence.RecordingImageURL)
+	if recordingURL == "" {
+		return false
+	}
+	// Placeholder image should not be treated as a true recording.
+	if strings.Contains(recordingURL, "placeholder.pics/svg") {
+		return false
+	}
+	return true
+}

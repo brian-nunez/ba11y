@@ -952,7 +952,7 @@ func defaultEvidence() Evidence {
 		DesktopImageURL:   "https://placeholder.pics/svg/640x360",
 		TabletImageURL:    "https://placeholder.pics/svg/400x550",
 		MobileImageURL:    "https://placeholder.pics/svg/300x540",
-		RecordingImageURL: "https://placeholder.pics/svg/640x360",
+		RecordingImageURL: "",
 	}
 }
 
@@ -967,9 +967,6 @@ func normalizeEvidence(evidence Evidence) Evidence {
 	}
 	if strings.TrimSpace(evidence.MobileImageURL) == "" {
 		evidence.MobileImageURL = defaults.MobileImageURL
-	}
-	if strings.TrimSpace(evidence.RecordingImageURL) == "" {
-		evidence.RecordingImageURL = defaults.RecordingImageURL
 	}
 
 	return evidence

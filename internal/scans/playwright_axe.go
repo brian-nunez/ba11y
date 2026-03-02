@@ -208,7 +208,7 @@ func captureEvidence(page playwright.Page, _ string) (Evidence, error) {
 		DesktopImageURL:   urls["desktop"],
 		TabletImageURL:    urls["tablet"],
 		MobileImageURL:    urls["mobile"],
-		RecordingImageURL: urls["desktop"],
+		RecordingImageURL: "",
 	}, nil
 }
 
