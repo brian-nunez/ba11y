@@ -11,9 +11,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/brian-nunez/go-echo-starter-template/views/components/button"
-	"github.com/brian-nunez/go-echo-starter-template/views/components/icon"
-	"github.com/brian-nunez/go-echo-starter-template/views/utils"
+	"github.com/brian-nunez/ba11y/views/components/button"
+	"github.com/brian-nunez/ba11y/views/components/icon"
+	"github.com/brian-nunez/ba11y/views/utils"
 )
 
 type Props struct {

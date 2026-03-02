@@ -1,7 +1,7 @@
 package httpserver
 
 import (
-	"github.com/brian-nunez/go-echo-starter-template/internal/handlers/errors"
+	"github.com/brian-nunez/ba11y/internal/handlers/errors"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

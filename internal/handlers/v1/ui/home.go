@@ -3,7 +3,7 @@ package uihandlers
 import (
 	"context"
 
-	"github.com/brian-nunez/go-echo-starter-template/views/pages"
+	"github.com/brian-nunez/ba11y/views/pages"
 	"github.com/labstack/echo/v4"
 )
 

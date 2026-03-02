@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/brian-nunez/go-echo-starter-template/internal/httpserver"
+	"github.com/brian-nunez/ba11y/internal/httpserver"
 )
 
 func main() {

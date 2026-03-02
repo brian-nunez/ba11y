@@ -1,7 +1,7 @@
 package v1
 
 import (
-	uihandlers "github.com/brian-nunez/go-echo-starter-template/internal/handlers/v1/ui"
+	uihandlers "github.com/brian-nunez/ba11y/internal/handlers/v1/ui"
 	"github.com/labstack/echo/v4"
 )
 

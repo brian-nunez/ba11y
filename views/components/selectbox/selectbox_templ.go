@@ -13,11 +13,11 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"context"
 	"fmt"
-	"github.com/brian-nunez/go-echo-starter-template/views/components/button"
-	"github.com/brian-nunez/go-echo-starter-template/views/components/icon"
-	"github.com/brian-nunez/go-echo-starter-template/views/components/input"
-	"github.com/brian-nunez/go-echo-starter-template/views/components/popover"
-	"github.com/brian-nunez/go-echo-starter-template/views/utils"
+	"github.com/brian-nunez/ba11y/views/components/button"
+	"github.com/brian-nunez/ba11y/views/components/icon"
+	"github.com/brian-nunez/ba11y/views/components/input"
+	"github.com/brian-nunez/ba11y/views/components/popover"
+	"github.com/brian-nunez/ba11y/views/utils"
 	"strconv"
 )
 

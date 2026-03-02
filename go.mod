@@ -1,4 +1,4 @@
-module github.com/brian-nunez/go-echo-starter-template
+module github.com/brian-nunez/ba11y
 
 go 1.23.0
 

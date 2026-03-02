@@ -19,3 +19,6 @@ tailwind:
 dev:
 	make -j3 templ tailwind server
 
+deps:
+	templ generate --proxy="http://localhost:8090" --open-browser=false
+	tailwindcss -i ./assets/css/input.css -o ./assets/css/output.css
