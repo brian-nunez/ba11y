@@ -54,7 +54,7 @@ func AuthPage(title string, action string, submitLabel string, secondaryText str
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h1><p class=\"mt-2 text-sm text-slate-500\">Use your email and password to continue.</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h1><p class=\"mt-2 text-sm text-slate-500\">Use your email and password to continue.</p><div class=\"mt-4 rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-600\"><span class=\"font-medium text-slate-700\">Demo account</span><div class=\"mt-1 font-mono text-slate-800\">demo@bjnunez.com / password123</div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -66,7 +66,7 @@ func AuthPage(title string, action string, submitLabel string, secondaryText str
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(errorMessage)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 15, Col: 111}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 21, Col: 111}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -84,7 +84,7 @@ func AuthPage(title string, action string, submitLabel string, secondaryText str
 			var templ_7745c5c3_Var5 templ.SafeURL
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(action)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 17, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 23, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -97,7 +97,7 @@ func AuthPage(title string, action string, submitLabel string, secondaryText str
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 20, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 26, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -110,7 +110,7 @@ func AuthPage(title string, action string, submitLabel string, secondaryText str
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(submitLabel)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 26, Col: 124}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 32, Col: 124}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -123,7 +123,7 @@ func AuthPage(title string, action string, submitLabel string, secondaryText str
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(secondaryText)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 29, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 35, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -136,7 +136,7 @@ func AuthPage(title string, action string, submitLabel string, secondaryText str
 			var templ_7745c5c3_Var9 templ.SafeURL
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(secondaryURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 30, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 36, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -149,7 +149,7 @@ func AuthPage(title string, action string, submitLabel string, secondaryText str
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(secondaryLabel)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 30, Col: 104}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/auth.templ`, Line: 36, Col: 104}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {

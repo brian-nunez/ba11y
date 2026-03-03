@@ -10,6 +10,12 @@ templ AuthPage(title string, action string, submitLabel string, secondaryText st
 					</div>
 					<h1 class="text-2xl font-bold">{ title }</h1>
 					<p class="mt-2 text-sm text-slate-500">Use your email and password to continue.</p>
+					<div class="mt-4 rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-600">
+						<span class="font-medium text-slate-700">Demo account</span>
+						<div class="mt-1 font-mono text-slate-800">
+							demo@bjnunez.com / password123
+						</div>
+					</div>
 				</div>
 				if errorMessage != "" {
 					<div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{ errorMessage }</div>
