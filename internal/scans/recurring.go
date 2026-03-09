@@ -197,6 +197,45 @@ func (s *Service) StopRecurringScan(ctx context.Context, actor auth.User, recurr
 	return s.changeRecurringState(ctx, actor, recurringScanID, RecurringScanStateStopped)
 }
 
+func (s *Service) DeleteRecurringScan(_ context.Context, actor auth.User, recurringScanID string) error {
+	s.mu.RLock()
+	current := s.recurringByID[recurringScanID]
+	if current == nil {
+		s.mu.RUnlock()
+		return ErrRecurringScanNotFound
+	}
+	recurring := s.cloneRecurringScan(current)
+	s.mu.RUnlock()
+
+	resource := authorization.ScanResource{OwnerUserID: recurring.OwnerUserID}
+	if !s.authorizer.Can(actor, resource, "scans.cancel") {
+		return ErrForbidden
+	}
+	if recurring.State != RecurringScanStateStopped {
+		return fmt.Errorf("%w: only stopped recurring scans can be deleted", ErrInvalidRecurringSchedule)
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	stored := s.recurringByID[recurringScanID]
+	if stored == nil {
+		return ErrRecurringScanNotFound
+	}
+	if stored.State != RecurringScanStateStopped {
+		return fmt.Errorf("%w: only stopped recurring scans can be deleted", ErrInvalidRecurringSchedule)
+	}
+
+	if _, err := s.db.Exec(`DELETE FROM recurring_scans WHERE id = ?`, recurringScanID); err != nil {
+		return fmt.Errorf("delete recurring scan: %w", err)
+	}
+
+	delete(s.recurringByID, recurringScanID)
+	s.orderedRecurringIDs = removeScanID(s.orderedRecurringIDs, recurringScanID)
+
+	return nil
+}
+
 func (s *Service) UpdateRecurringScan(ctx context.Context, actor auth.User, recurringScanID string, input UpdateRecurringScanInput) (RecurringScan, error) {
 	s.mu.RLock()
 	current := s.recurringByID[recurringScanID]

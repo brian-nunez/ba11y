@@ -34,6 +34,7 @@ func RegisterRoutes(e *echo.Echo, dependencies Dependencies) {
 	e.POST("/scans/recurring/:recurringScanId/enable", handler.EnableRecurringScan, uihandlers.RequireAuth)
 	e.POST("/scans/recurring/:recurringScanId/disable", handler.DisableRecurringScan, uihandlers.RequireAuth)
 	e.POST("/scans/recurring/:recurringScanId/stop", handler.StopRecurringScan, uihandlers.RequireAuth)
+	e.POST("/scans/recurring/:recurringScanId/delete", handler.DeleteRecurringScan, uihandlers.RequireAuth)
 	e.POST("/scans/:scanId/cancel", handler.CancelScan, uihandlers.RequireAuth)
 	e.GET("/scans/:scanId/progress", handler.ScanProgress, uihandlers.RequireAuth)
 	e.GET("/scans/:scanId/report", handler.ScanReport, uihandlers.RequireAuth)

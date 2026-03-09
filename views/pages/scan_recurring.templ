@@ -199,6 +199,12 @@ templ ScanRecurringPage(session SessionView, currentUser auth.User, scan scans.S
 															<button type="submit" class="rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50">Stop</button>
 														</form>
 													}
+													if recurring.State == scans.RecurringScanStateStopped {
+														<form method="post" action={ "/scans/recurring/" + recurring.ID + "/delete" }>
+															<input type="hidden" name="return_to" value={ "/scans/" + scan.ID + "/recurring" }/>
+															<button type="submit" class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">Delete</button>
+														</form>
+													}
 												</div>
 											</td>
 										</tr>

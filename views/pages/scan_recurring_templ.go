@@ -663,169 +663,201 @@ func ScanRecurringPage(session SessionView, currentUser auth.User, scan scans.Sc
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "</div></td></tr>")
+				if recurring.State == scans.RecurringScanStateStopped {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "<form method=\"post\" action=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var35 templ.SafeURL
+					templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinURLErrs("/scans/recurring/" + recurring.ID + "/delete")
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 203, Col: 89}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "\"><input type=\"hidden\" name=\"return_to\" value=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var36 string
+					templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs("/scans/" + scan.ID + "/recurring")
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 204, Col: 95}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "\"> <button type=\"submit\" class=\"rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100\">Delete</button></form>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "</div></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "</tbody></table></div></section><section class=\"rounded-xl border border-slate-200 bg-white p-6 shadow-sm\"><div class=\"mb-4 flex items-center justify-between\"><h2 class=\"text-lg font-bold text-slate-900\">Recurring Scan Results</h2><span class=\"text-xs font-semibold uppercase tracking-wider text-slate-500\">Historical</span></div><div class=\"overflow-x-auto\"><table class=\"w-full border-collapse text-left\"><thead><tr class=\"border-b border-slate-200 bg-slate-50\"><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Scan</th><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Triggered By</th><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Status</th><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Created</th><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Issues</th><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Action</th></tr></thead> <tbody class=\"divide-y divide-slate-100\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "</tbody></table></div></section><section class=\"rounded-xl border border-slate-200 bg-white p-6 shadow-sm\"><div class=\"mb-4 flex items-center justify-between\"><h2 class=\"text-lg font-bold text-slate-900\">Recurring Scan Results</h2><span class=\"text-xs font-semibold uppercase tracking-wider text-slate-500\">Historical</span></div><div class=\"overflow-x-auto\"><table class=\"w-full border-collapse text-left\"><thead><tr class=\"border-b border-slate-200 bg-slate-50\"><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Scan</th><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Triggered By</th><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Status</th><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Created</th><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Issues</th><th class=\"px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500\">Action</th></tr></thead> <tbody class=\"divide-y divide-slate-100\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(recurringRuns) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "<tr><td class=\"px-4 py-8 text-sm text-slate-500\" colspan=\"6\">No recurring-triggered scan runs yet.</td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "<tr><td class=\"px-4 py-8 text-sm text-slate-500\" colspan=\"6\">No recurring-triggered scan runs yet.</td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			for _, recurringRun := range recurringRuns {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "<tr class=\"hover:bg-slate-50/60\"><td class=\"px-4 py-4\"><p class=\"font-semibold text-slate-800\">#")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var35 string
-				templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(recurringRun.ID)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 237, Col: 70}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "</p><p class=\"text-xs text-slate-500\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var36 string
-				templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(recurringRun.Target)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 238, Col: 67}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "</p></td><td class=\"px-4 py-4 text-sm text-slate-700\">#")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "<tr class=\"hover:bg-slate-50/60\"><td class=\"px-4 py-4\"><p class=\"font-semibold text-slate-800\">#")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var37 string
-				templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(recurringRun.RecurringScanID)
+				templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(recurringRun.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 240, Col: 87}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 243, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "</td><td class=\"px-4 py-4\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "</p><p class=\"text-xs text-slate-500\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var38 = []any{HistoryStatusClass(recurringRun.Status)}
-				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var38...)
+				var templ_7745c5c3_Var38 string
+				templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(recurringRun.Target)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 244, Col: 67}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "<span class=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "</p></td><td class=\"px-4 py-4 text-sm text-slate-700\">#")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var39 string
-				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var38).String())
+				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(recurringRun.RecurringScanID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 1, Col: 0}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 246, Col: 87}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "</td><td class=\"px-4 py-4\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var40 string
-				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(string(recurringRun.Status))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 242, Col: 97}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
+				var templ_7745c5c3_Var40 = []any{HistoryStatusClass(recurringRun.Status)}
+				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var40...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "</span></td><td class=\"px-4 py-4 text-sm text-slate-700\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "<span class=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var41 string
-				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(FormattedScanTime(recurringRun.CreatedAt))
+				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var40).String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 244, Col: 99}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 1, Col: 0}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "</td><td class=\"px-4 py-4 text-sm text-slate-700\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var42 string
-				templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d total · %d critical", recurringRun.Summary.Total, recurringRun.Summary.Critical))
+				templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(string(recurringRun.Status))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 245, Col: 155}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 248, Col: 97}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "</td><td class=\"px-4 py-4\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "</span></td><td class=\"px-4 py-4 text-sm text-slate-700\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var43 string
+				templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(FormattedScanTime(recurringRun.CreatedAt))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 250, Col: 99}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "</td><td class=\"px-4 py-4 text-sm text-slate-700\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var44 string
+				templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d total · %d critical", recurringRun.Summary.Total, recurringRun.Summary.Critical))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 251, Col: 155}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "</td><td class=\"px-4 py-4\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if recurringRun.Status == scans.ScanStatusCompleted {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "<a href=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, "<a href=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var43 templ.SafeURL
-					templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinURLErrs("/scans/" + recurringRun.ID + "/report")
+					var templ_7745c5c3_Var45 templ.SafeURL
+					templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinURLErrs("/scans/" + recurringRun.ID + "/report")
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 248, Col: 62}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 254, Col: 62}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "\" class=\"rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50\">View Report</a>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "\" class=\"rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50\">View Report</a>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "<a href=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, "<a href=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var44 templ.SafeURL
-					templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinURLErrs("/scans/" + recurringRun.ID + "/progress")
+					var templ_7745c5c3_Var46 templ.SafeURL
+					templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinURLErrs("/scans/" + recurringRun.ID + "/progress")
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 250, Col: 64}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_recurring.templ`, Line: 256, Col: 64}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, "\" class=\"rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50\">View Status</a>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "\" class=\"rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50\">View Status</a>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "</td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "</td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, "</tbody></table></div></section></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "</tbody></table></div></section></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -833,7 +865,7 @@ func ScanRecurringPage(session SessionView, currentUser auth.User, scan scans.Sc
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "</div></div><script>\n\t\t\t(function () {\n\t\t\t\tconst form = document.getElementById(\"recurring-schedule-form\");\n\t\t\t\tconst timezoneInput = document.getElementById(\"recurring-timezone-input\");\n\t\t\t\tconst minuteInput = document.getElementById(\"recurring-minute-input\");\n\t\t\t\tconst hourInput = document.getElementById(\"recurring-hour-input\");\n\t\t\t\tconst weekdayInput = document.getElementById(\"recurring-weekday-input\");\n\t\t\t\tconst monthdayInput = document.getElementById(\"recurring-monthday-input\");\n\t\t\t\tconst hourField = document.getElementById(\"recurring-hour-field\");\n\t\t\t\tconst weekdayField = document.getElementById(\"recurring-weekday-field\");\n\t\t\t\tconst monthdayField = document.getElementById(\"recurring-monthday-field\");\n\t\t\t\tconst preview = document.getElementById(\"recurring-schedule-preview\");\n\t\t\t\tconst frequencyInputs = form ? form.querySelectorAll(\"input[name='frequency']\") : [];\n\t\t\t\tconst weekdayLabels = [\"Sunday\", \"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\", \"Saturday\"];\n\n\t\t\t\tif (!form || !timezoneInput || !minuteInput || !hourInput || !weekdayInput || !monthdayInput || !hourField || !weekdayField || !monthdayField || !preview) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tif (timezoneInput.value.trim() === \"\" || timezoneInput.value.trim() === \"UTC\") {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst resolved = Intl.DateTimeFormat().resolvedOptions().timeZone;\n\t\t\t\t\t\tif (resolved && typeof resolved === \"string\") {\n\t\t\t\t\t\t\ttimezoneInput.value = resolved;\n\t\t\t\t\t\t}\n\t\t\t\t\t} catch (error) {\n\t\t\t\t\t\t// keep default timezone\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tfunction pad(value) {\n\t\t\t\t\tconst n = Number.parseInt(value, 10);\n\t\t\t\t\tif (Number.isNaN(n)) {\n\t\t\t\t\t\treturn \"00\";\n\t\t\t\t\t}\n\t\t\t\t\treturn String(Math.max(0, n)).padStart(2, \"0\");\n\t\t\t\t}\n\n\t\t\t\tfunction selectedFrequency() {\n\t\t\t\t\tfor (const input of frequencyInputs) {\n\t\t\t\t\t\tif (input.checked) {\n\t\t\t\t\t\t\treturn input.value;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\treturn \"daily\";\n\t\t\t\t}\n\n\t\t\t\tfunction updateVisibility() {\n\t\t\t\t\tconst frequency = selectedFrequency();\n\t\t\t\t\thourField.classList.toggle(\"hidden\", frequency === \"hourly\");\n\t\t\t\t\tweekdayField.classList.toggle(\"hidden\", frequency !== \"weekly\");\n\t\t\t\t\tmonthdayField.classList.toggle(\"hidden\", frequency !== \"monthly\");\n\t\t\t\t}\n\n\t\t\t\tfunction updatePreview() {\n\t\t\t\t\tconst frequency = selectedFrequency();\n\t\t\t\t\tconst minute = pad(minuteInput.value);\n\t\t\t\t\tconst hour = pad(hourInput.value);\n\t\t\t\t\tconst weekdayIndex = Number.parseInt(weekdayInput.value, 10);\n\t\t\t\t\tconst weekday = Number.isInteger(weekdayIndex) && weekdayIndex >= 0 && weekdayIndex < weekdayLabels.length ? weekdayLabels[weekdayIndex] : \"Monday\";\n\t\t\t\t\tconst monthday = Number.parseInt(monthdayInput.value, 10);\n\t\t\t\t\tconst timezone = timezoneInput.value.trim() || \"UTC\";\n\n\t\t\t\t\tif (frequency === \"hourly\") {\n\t\t\t\t\t\tpreview.textContent = `Runs every hour at minute ${minute} (${timezone}).`;\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tif (frequency === \"daily\") {\n\t\t\t\t\t\tpreview.textContent = `Runs every day at ${hour}:${minute} (${timezone}).`;\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tif (frequency === \"weekly\") {\n\t\t\t\t\t\tpreview.textContent = `Runs every ${weekday} at ${hour}:${minute} (${timezone}).`;\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tconst normalizedMonthday = Number.isInteger(monthday) && monthday >= 1 && monthday <= 31 ? monthday : 1;\n\t\t\t\t\tpreview.textContent = `Runs monthly on day ${normalizedMonthday} at ${hour}:${minute} (${timezone}).`;\n\t\t\t\t}\n\n\t\t\t\tfunction syncScheduleUX() {\n\t\t\t\t\tupdateVisibility();\n\t\t\t\t\tupdatePreview();\n\t\t\t\t}\n\n\t\t\t\tfor (const input of frequencyInputs) {\n\t\t\t\t\tinput.addEventListener(\"change\", syncScheduleUX);\n\t\t\t\t}\n\t\t\t\tminuteInput.addEventListener(\"input\", updatePreview);\n\t\t\t\thourInput.addEventListener(\"input\", updatePreview);\n\t\t\t\tweekdayInput.addEventListener(\"change\", updatePreview);\n\t\t\t\tmonthdayInput.addEventListener(\"input\", updatePreview);\n\t\t\t\ttimezoneInput.addEventListener(\"input\", updatePreview);\n\t\t\t\tsyncScheduleUX();\n\t\t\t})();\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "</div></div><script>\n\t\t\t(function () {\n\t\t\t\tconst form = document.getElementById(\"recurring-schedule-form\");\n\t\t\t\tconst timezoneInput = document.getElementById(\"recurring-timezone-input\");\n\t\t\t\tconst minuteInput = document.getElementById(\"recurring-minute-input\");\n\t\t\t\tconst hourInput = document.getElementById(\"recurring-hour-input\");\n\t\t\t\tconst weekdayInput = document.getElementById(\"recurring-weekday-input\");\n\t\t\t\tconst monthdayInput = document.getElementById(\"recurring-monthday-input\");\n\t\t\t\tconst hourField = document.getElementById(\"recurring-hour-field\");\n\t\t\t\tconst weekdayField = document.getElementById(\"recurring-weekday-field\");\n\t\t\t\tconst monthdayField = document.getElementById(\"recurring-monthday-field\");\n\t\t\t\tconst preview = document.getElementById(\"recurring-schedule-preview\");\n\t\t\t\tconst frequencyInputs = form ? form.querySelectorAll(\"input[name='frequency']\") : [];\n\t\t\t\tconst weekdayLabels = [\"Sunday\", \"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\", \"Saturday\"];\n\n\t\t\t\tif (!form || !timezoneInput || !minuteInput || !hourInput || !weekdayInput || !monthdayInput || !hourField || !weekdayField || !monthdayField || !preview) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tif (timezoneInput.value.trim() === \"\" || timezoneInput.value.trim() === \"UTC\") {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst resolved = Intl.DateTimeFormat().resolvedOptions().timeZone;\n\t\t\t\t\t\tif (resolved && typeof resolved === \"string\") {\n\t\t\t\t\t\t\ttimezoneInput.value = resolved;\n\t\t\t\t\t\t}\n\t\t\t\t\t} catch (error) {\n\t\t\t\t\t\t// keep default timezone\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tfunction pad(value) {\n\t\t\t\t\tconst n = Number.parseInt(value, 10);\n\t\t\t\t\tif (Number.isNaN(n)) {\n\t\t\t\t\t\treturn \"00\";\n\t\t\t\t\t}\n\t\t\t\t\treturn String(Math.max(0, n)).padStart(2, \"0\");\n\t\t\t\t}\n\n\t\t\t\tfunction selectedFrequency() {\n\t\t\t\t\tfor (const input of frequencyInputs) {\n\t\t\t\t\t\tif (input.checked) {\n\t\t\t\t\t\t\treturn input.value;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\treturn \"daily\";\n\t\t\t\t}\n\n\t\t\t\tfunction updateVisibility() {\n\t\t\t\t\tconst frequency = selectedFrequency();\n\t\t\t\t\thourField.classList.toggle(\"hidden\", frequency === \"hourly\");\n\t\t\t\t\tweekdayField.classList.toggle(\"hidden\", frequency !== \"weekly\");\n\t\t\t\t\tmonthdayField.classList.toggle(\"hidden\", frequency !== \"monthly\");\n\t\t\t\t}\n\n\t\t\t\tfunction updatePreview() {\n\t\t\t\t\tconst frequency = selectedFrequency();\n\t\t\t\t\tconst minute = pad(minuteInput.value);\n\t\t\t\t\tconst hour = pad(hourInput.value);\n\t\t\t\t\tconst weekdayIndex = Number.parseInt(weekdayInput.value, 10);\n\t\t\t\t\tconst weekday = Number.isInteger(weekdayIndex) && weekdayIndex >= 0 && weekdayIndex < weekdayLabels.length ? weekdayLabels[weekdayIndex] : \"Monday\";\n\t\t\t\t\tconst monthday = Number.parseInt(monthdayInput.value, 10);\n\t\t\t\t\tconst timezone = timezoneInput.value.trim() || \"UTC\";\n\n\t\t\t\t\tif (frequency === \"hourly\") {\n\t\t\t\t\t\tpreview.textContent = `Runs every hour at minute ${minute} (${timezone}).`;\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tif (frequency === \"daily\") {\n\t\t\t\t\t\tpreview.textContent = `Runs every day at ${hour}:${minute} (${timezone}).`;\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tif (frequency === \"weekly\") {\n\t\t\t\t\t\tpreview.textContent = `Runs every ${weekday} at ${hour}:${minute} (${timezone}).`;\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tconst normalizedMonthday = Number.isInteger(monthday) && monthday >= 1 && monthday <= 31 ? monthday : 1;\n\t\t\t\t\tpreview.textContent = `Runs monthly on day ${normalizedMonthday} at ${hour}:${minute} (${timezone}).`;\n\t\t\t\t}\n\n\t\t\t\tfunction syncScheduleUX() {\n\t\t\t\t\tupdateVisibility();\n\t\t\t\t\tupdatePreview();\n\t\t\t\t}\n\n\t\t\t\tfor (const input of frequencyInputs) {\n\t\t\t\t\tinput.addEventListener(\"change\", syncScheduleUX);\n\t\t\t\t}\n\t\t\t\tminuteInput.addEventListener(\"input\", updatePreview);\n\t\t\t\thourInput.addEventListener(\"input\", updatePreview);\n\t\t\t\tweekdayInput.addEventListener(\"change\", updatePreview);\n\t\t\t\tmonthdayInput.addEventListener(\"input\", updatePreview);\n\t\t\t\ttimezoneInput.addEventListener(\"input\", updatePreview);\n\t\t\t\tsyncScheduleUX();\n\t\t\t})();\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -155,20 +155,24 @@ func (h *Handler) CreateRecurringScanFromReport(c echo.Context) error {
 	}
 	if strings.TrimSpace(scan.RecurringScanID) != "" {
 		recurring, recurringErr := h.scanService.GetRecurringScanForUser(c.Request().Context(), currentUser, scan.RecurringScanID)
-		if recurringErr != nil && !errors.Is(recurringErr, scans.ErrRecurringScanNotFound) && !errors.Is(recurringErr, scans.ErrForbidden) {
-			return recurringErr
-		}
-
-		sourceScanID := strings.TrimSpace(scan.ID)
-		if recurringErr == nil {
+		if recurringErr != nil {
+			if errors.Is(recurringErr, scans.ErrRecurringScanNotFound) {
+				// The original recurring schedule was deleted; allow creating a new one from this historical run.
+			} else if errors.Is(recurringErr, scans.ErrForbidden) {
+				return echo.NewHTTPError(http.StatusForbidden, recurringErr.Error())
+			} else {
+				return recurringErr
+			}
+		} else {
+			sourceScanID := strings.TrimSpace(scan.ID)
 			if source := strings.TrimSpace(recurring.SourceScanID); source != "" {
 				sourceScanID = source
 			}
+			if sourceScanID == "" {
+				sourceScanID = strings.TrimSpace(c.Param("scanId"))
+			}
+			return redirectWithMessage(c, "/scans/"+sourceScanID+"/recurring", "error", "Recurring runs cannot create new recurring schedules")
 		}
-		if sourceScanID == "" {
-			sourceScanID = strings.TrimSpace(c.Param("scanId"))
-		}
-		return redirectWithMessage(c, "/scans/"+sourceScanID+"/recurring", "error", "Recurring runs cannot create new recurring schedules")
 	}
 
 	recurringForm := recurringScheduleFormFromRequest(c)
@@ -251,21 +255,25 @@ func (h *Handler) ScanRecurring(c echo.Context) error {
 	}
 	if strings.TrimSpace(scan.RecurringScanID) != "" {
 		recurring, recurringErr := h.scanService.GetRecurringScanForUser(c.Request().Context(), currentUser, scan.RecurringScanID)
-		if recurringErr != nil && !errors.Is(recurringErr, scans.ErrRecurringScanNotFound) && !errors.Is(recurringErr, scans.ErrForbidden) {
-			return recurringErr
-		}
-
-		sourceScanID := strings.TrimSpace(scan.ID)
-		if recurringErr == nil {
+		if recurringErr != nil {
+			if errors.Is(recurringErr, scans.ErrRecurringScanNotFound) {
+				// The original recurring schedule was deleted; allow opening recurring config for this scan.
+			} else if errors.Is(recurringErr, scans.ErrForbidden) {
+				return echo.NewHTTPError(http.StatusForbidden, recurringErr.Error())
+			} else {
+				return recurringErr
+			}
+		} else {
+			sourceScanID := strings.TrimSpace(scan.ID)
 			if source := strings.TrimSpace(recurring.SourceScanID); source != "" {
 				sourceScanID = source
 			}
-		}
 
-		if sourceScanID != scan.ID {
-			return redirectWithMessage(c, "/scans/"+sourceScanID+"/recurring", "error", "Manage recurring schedules from the original source scan")
+			if sourceScanID != scan.ID {
+				return redirectWithMessage(c, "/scans/"+sourceScanID+"/recurring", "error", "Manage recurring schedules from the original source scan")
+			}
+			return redirectWithMessage(c, "/scans", "error", "Recurring runs cannot create recurring schedules")
 		}
-		return redirectWithMessage(c, "/scans", "error", "Recurring runs cannot create recurring schedules")
 	}
 
 	recurringScans, err := h.scanService.ListRecurringScansForScan(c.Request().Context(), currentUser, scan.ID)
@@ -370,6 +378,20 @@ func (h *Handler) StopRecurringScan(c echo.Context) error {
 	}
 
 	return redirectToReturnPathWithMessage(c, "/scans/new", "success", "Recurring scan stopped")
+}
+
+func (h *Handler) DeleteRecurringScan(c echo.Context) error {
+	currentUser, ok := getCurrentUser(c)
+	if !ok {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
+
+	err := h.scanService.DeleteRecurringScan(c.Request().Context(), currentUser, c.Param("recurringScanId"))
+	if err != nil {
+		return redirectToReturnPathWithMessage(c, "/scans/recurring", "error", err.Error())
+	}
+
+	return redirectToReturnPathWithMessage(c, "/scans/recurring", "success", "Recurring scan deleted")
 }
 
 func (h *Handler) RecurringScanWebhook(c echo.Context) error {
