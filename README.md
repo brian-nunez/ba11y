@@ -28,7 +28,7 @@ This app is intentionally wired to my libraries:
 - `baccess` for RBAC/ABAC authorization checks
   - Import: `github.com/brian-nunez/baccess`
 - `btick` Scheduler SDK for recurring cron registration
-  - Import: `github.com/brian-nunez/go-echo-starter-template/sdk/go/scheduler`
+  - Import: `github.com/brian-nunez/btick/sdk/go/scheduler`
 
 ## Auth Flow
 

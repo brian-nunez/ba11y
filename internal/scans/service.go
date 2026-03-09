@@ -16,7 +16,7 @@ import (
 	"github.com/brian-nunez/ba11y/internal/auth"
 	"github.com/brian-nunez/ba11y/internal/authorization"
 	"github.com/brian-nunez/bbaas-api/sdk/go/bbaas"
-	btick "github.com/brian-nunez/go-echo-starter-template/sdk/go/scheduler"
+	btick "github.com/brian-nunez/btick/sdk/go/scheduler"
 	worker "github.com/brian-nunez/task-orchestration"
 )
 

@@ -7,7 +7,7 @@ require (
 	github.com/a-h/templ v0.3.924
 	github.com/brian-nunez/baccess v1.0.3
 	github.com/brian-nunez/bbaas-api v0.0.0-20260301044228-89abb25c869e
-	github.com/brian-nunez/go-echo-starter-template v1.0.0
+	github.com/brian-nunez/btick v1.0.1
 	github.com/brian-nunez/task-orchestration v0.0.6
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/playwright-community/playwright-go v0.5700.1
@@ -16,7 +16,6 @@ require (
 )
 
 require (
-	github.com/brian-nunez/btick v1.0.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
@@ -38,5 +37,3 @@ require (
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.9.1 // indirect
 )
-
-replace github.com/brian-nunez/go-echo-starter-template => github.com/brian-nunez/btick v1.0.0

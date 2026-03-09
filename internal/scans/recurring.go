@@ -11,7 +11,7 @@ import (
 
 	"github.com/brian-nunez/ba11y/internal/auth"
 	"github.com/brian-nunez/ba11y/internal/authorization"
-	btick "github.com/brian-nunez/go-echo-starter-template/sdk/go/scheduler"
+	btick "github.com/brian-nunez/btick/sdk/go/scheduler"
 )
 
 const recurringWebhookSecretHeader = "X-BA11Y-WEBHOOK-SECRET"

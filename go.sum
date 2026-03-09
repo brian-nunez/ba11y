@@ -6,8 +6,6 @@ github.com/brian-nunez/baccess v1.0.3 h1:FPnMAWEp7H8Zq9LJb+7V9nhpMm6HwZK78975XLj
 github.com/brian-nunez/baccess v1.0.3/go.mod h1:8TBuAFKF9DsFF0RtkJ1dBfWOOGlEp1JMpZaywuroQuk=
 github.com/brian-nunez/bbaas-api v0.0.0-20260301044228-89abb25c869e h1:QoF9k4+vZABt1KJPFy4kkbk2hMguTGFUWICZ0zOOuGM=
 github.com/brian-nunez/bbaas-api v0.0.0-20260301044228-89abb25c869e/go.mod h1:S0up3tLGQAF88eUiNtwHzOuGasxECPIOsjkmJ+83pmU=
-github.com/brian-nunez/btick v1.0.0 h1:OkxdoUzcW+MY3lSsU/+nhW/70n43KewccefLi80NVZM=
-github.com/brian-nunez/btick v1.0.0/go.mod h1:iw6AGffpA9j+tjJt49WkHh6q+OAAYRdv0LoCD2JEmmo=
 github.com/brian-nunez/btick v1.0.1 h1:zljI0k3jOQo/0B3VDiDpp8FTIjeuvnWODRMQtoeft+c=
 github.com/brian-nunez/btick v1.0.1/go.mod h1:tpzbVXDTTxg0rcMf5Fb+jkVFu1LaiUKlvsMOwdetst4=
 github.com/brian-nunez/task-orchestration v0.0.6 h1:t0k4bidllccTEC9FdBF9+6XyKa01C6qwgu7IHZv6CTE=
