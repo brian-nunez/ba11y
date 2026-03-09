@@ -13,7 +13,7 @@ services:
       SCAN_WORKER_LOG_PATH: "/data/logs"
       SCAN_WORKER_CONCURRENCY: "3"
       BBAAS_BASE_URL: "https://bbaas.b8z.me"
-      BBAAS_API_TOKEN: "bka_67f5c9e61babecf7e99c35d6db75b6ecb3c1ce29a44ec099"
+      BBAAS_API_TOKEN: ""
       BBAAS_API_KEY: ""
       BTICK_BASE_URL: ""
       BTICK_API_KEY: ""
