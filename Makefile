@@ -1,4 +1,6 @@
-.PHONY: templ server tailwind dev
+.PHONY: templ server tailwind dev playwright-driver
+
+PLAYWRIGHT_GO_MODULE_VERSION := v0.5700.1
 
 templ:
 	templ generate --watch --proxy="http://localhost:8090" --open-browser=false
@@ -22,3 +24,6 @@ dev:
 deps:
 	templ generate --proxy="http://localhost:8090" --open-browser=false
 	tailwindcss -i ./assets/css/input.css -o ./assets/css/output.css
+
+playwright-driver:
+	go run github.com/playwright-community/playwright-go/cmd/playwright@$(PLAYWRIGHT_GO_MODULE_VERSION) --version

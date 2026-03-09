@@ -2,6 +2,8 @@ FROM golang:1.25-bookworm AS builder
 
 WORKDIR /src
 
+ARG PLAYWRIGHT_GO_MODULE_VERSION=v0.5700.1
+
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod \
   --mount=type=cache,target=/root/.cache/go-build \
@@ -17,6 +19,11 @@ RUN --mount=type=cache,target=/go/pkg/mod \
   CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
   go build -trimpath -ldflags='-s -w' -o /out/ba11y ./cmd/main.go
 
+# Download only the pinned Playwright driver bundle (no browser binaries).
+RUN --mount=type=cache,target=/go/pkg/mod \
+  --mount=type=cache,target=/root/.cache/go-build \
+  go run github.com/playwright-community/playwright-go/cmd/playwright@${PLAYWRIGHT_GO_MODULE_VERSION} --version
+
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -31,6 +38,7 @@ WORKDIR /app
 
 COPY --from=builder /out/ba11y /usr/local/bin/ba11y
 COPY --from=builder /src/assets ./assets
+COPY --from=builder /root/.cache/ms-playwright-go /home/app/.cache/ms-playwright-go
 
 RUN mkdir -p /data/logs /home/app/.cache && chown -R app:app /app /data /home/app
 
@@ -43,6 +51,7 @@ ENV HOME=/home/app \
   BBAAS_BASE_URL=http://127.0.0.1:8080 \
   BBAAS_API_TOKEN= \
   BBAAS_API_KEY= \
+  PLAYWRIGHT_DRIVER_PATH=/home/app/.cache/ms-playwright-go/1.57.0 \
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 VOLUME ["/data"]

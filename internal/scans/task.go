@@ -11,6 +11,8 @@ import (
 	"github.com/playwright-community/playwright-go"
 )
 
+const playwrightGoModuleVersion = "v0.5700.1"
+
 type scanTask struct {
 	service *Service
 	scanID  string
@@ -176,6 +178,13 @@ func formatPlaywrightRuntimeFailure(err error) string {
 
 	if errors.Is(err, ErrInvalidTarget) {
 		return "Could not start Playwright runtime"
+	}
+
+	if strings.Contains(message, "please install the driver") {
+		return fmt.Sprintf(
+			"Could not start Playwright runtime: install the pinned driver with `go run github.com/playwright-community/playwright-go/cmd/playwright@%s --version`",
+			playwrightGoModuleVersion,
+		)
 	}
 
 	return "Could not start Playwright runtime: " + message

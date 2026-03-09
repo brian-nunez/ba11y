@@ -93,7 +93,8 @@ All app state is persisted in SQLite:
 - `air` (optional, for hot reload)
 
 Notes:
-- The app installs the Playwright driver automatically with `SkipInstallBrowsers=true`.
+- Playwright is pinned via `github.com/playwright-community/playwright-go v0.5700.1` (driver `v1.57.0`).
+- Install the pinned driver (driver-only, no browsers) with `make playwright-driver`.
 - Browser binaries are not installed locally; scans run in your spawned BaaS browser via CDP.
 - Recurring execution depends on btick's worker process. If btick API is running without its worker, jobs are created but no webhooks are fired.
 
