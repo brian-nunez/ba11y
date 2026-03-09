@@ -33,6 +33,33 @@ const (
 	ScanStatusCanceled  ScanStatus = "canceled"
 )
 
+type RecurringFrequency string
+
+const (
+	RecurringFrequencyHourly  RecurringFrequency = "hourly"
+	RecurringFrequencyDaily   RecurringFrequency = "daily"
+	RecurringFrequencyWeekly  RecurringFrequency = "weekly"
+	RecurringFrequencyMonthly RecurringFrequency = "monthly"
+)
+
+func ParseRecurringFrequency(raw string) (RecurringFrequency, error) {
+	frequency := RecurringFrequency(strings.ToLower(strings.TrimSpace(raw)))
+	switch frequency {
+	case RecurringFrequencyHourly, RecurringFrequencyDaily, RecurringFrequencyWeekly, RecurringFrequencyMonthly:
+		return frequency, nil
+	default:
+		return "", fmt.Errorf("unsupported recurring frequency: %s", raw)
+	}
+}
+
+type RecurringScanState string
+
+const (
+	RecurringScanStateEnabled  RecurringScanState = "enabled"
+	RecurringScanStateDisabled RecurringScanState = "disabled"
+	RecurringScanStateStopped  RecurringScanState = "stopped"
+)
+
 type FindingSeverity string
 
 const (
@@ -113,6 +140,32 @@ type Scan struct {
 	AxeRaw   string
 }
 
+type RecurringScan struct {
+	ID                   string
+	SourceScanID         string
+	OwnerUserID          string
+	RequestedByEmail     string
+	Type                 ScanType
+	Target               string
+	Standard             string
+	IncludeBestPractices bool
+
+	Frequency      RecurringFrequency
+	CronExpression string
+	Timezone       string
+	Minute         int
+	HourOfDay      int
+	DayOfWeek      int
+	DayOfMonth     int
+
+	BTickJobID      string
+	State           RecurringScanState
+	LastTriggeredAt *time.Time
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	StoppedAt       *time.Time
+}
+
 type CreateScanInput struct {
 	OwnerUserID           string
 	OwnerEmail            string
@@ -123,6 +176,29 @@ type CreateScanInput struct {
 	IncludeVisualContrast bool
 	IncludeSubPages       bool
 	IncludeBestPractices  bool
+}
+
+type CreateRecurringScanInput struct {
+	SourceScanID         string
+	OwnerUserID          string
+	OwnerEmail           string
+	Type                 ScanType
+	Target               string
+	Standard             string
+	IncludeBestPractices bool
+	Frequency            RecurringFrequency
+	Timezone             string
+	Minute               int
+	HourOfDay            int
+	DayOfWeek            int
+	DayOfMonth           int
+}
+
+type RecurringWebhookPayload struct {
+	RecurringScanID string `json:"recurring_scan_id"`
+	OwnerUserID     string `json:"owner_user_id,omitempty"`
+	OwnerEmail      string `json:"owner_email,omitempty"`
+	Target          string `json:"target,omitempty"`
 }
 
 type StatusPayload struct {

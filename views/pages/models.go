@@ -20,11 +20,38 @@ type ScanFormView struct {
 	IncludeBestPractices bool
 }
 
+type RecurringFormView struct {
+	SelectedType         string
+	Target               string
+	Standard             string
+	IncludeBestPractices bool
+	Frequency            string
+	Minute               int
+	HourOfDay            int
+	DayOfWeek            int
+	DayOfMonth           int
+	Timezone             string
+}
+
 func DefaultScanForm() ScanFormView {
 	return ScanFormView{
 		SelectedType:         string(scans.ScanTypeWebPage),
 		Standard:             "WCAG 2.1 Level AA",
 		IncludeBestPractices: false,
+	}
+}
+
+func DefaultRecurringForm() RecurringFormView {
+	return RecurringFormView{
+		SelectedType:         string(scans.ScanTypeWebPage),
+		Standard:             "WCAG 2.1 Level AA",
+		IncludeBestPractices: false,
+		Frequency:            string(scans.RecurringFrequencyDaily),
+		Minute:               0,
+		HourOfDay:            9,
+		DayOfWeek:            1,
+		DayOfMonth:           1,
+		Timezone:             "UTC",
 	}
 }
 
@@ -94,6 +121,13 @@ func FormattedScanTime(createdAt time.Time) string {
 		return ""
 	}
 	return createdAt.UTC().Format("Jan 2, 2006, 15:04 UTC")
+}
+
+func FormattedOptionalScanTime(value *time.Time) string {
+	if value == nil || value.IsZero() {
+		return "Never"
+	}
+	return FormattedScanTime(*value)
 }
 
 func RiskLabel(summary scans.Summary) string {
@@ -168,4 +202,69 @@ func HasRecordingEvidence(scan scans.Scan) bool {
 		return false
 	}
 	return true
+}
+
+func RecurringStateClass(state scans.RecurringScanState) string {
+	base := "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+	switch state {
+	case scans.RecurringScanStateEnabled:
+		return base + " bg-emerald-100 text-emerald-700"
+	case scans.RecurringScanStateDisabled:
+		return base + " bg-amber-100 text-amber-700"
+	case scans.RecurringScanStateStopped:
+		return base + " bg-slate-200 text-slate-700"
+	default:
+		return base + " bg-slate-200 text-slate-700"
+	}
+}
+
+func RecurringStateLabel(state scans.RecurringScanState) string {
+	switch state {
+	case scans.RecurringScanStateEnabled:
+		return "Enabled"
+	case scans.RecurringScanStateDisabled:
+		return "Disabled"
+	case scans.RecurringScanStateStopped:
+		return "Stopped"
+	default:
+		return strings.Title(string(state))
+	}
+}
+
+func RecurringFrequencyLabel(frequency scans.RecurringFrequency) string {
+	switch frequency {
+	case scans.RecurringFrequencyHourly:
+		return "Hourly"
+	case scans.RecurringFrequencyDaily:
+		return "Daily"
+	case scans.RecurringFrequencyWeekly:
+		return "Weekly"
+	case scans.RecurringFrequencyMonthly:
+		return "Monthly"
+	default:
+		return strings.Title(string(frequency))
+	}
+}
+
+func WeekdayLabel(day int) string {
+	labels := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
+	if day < 0 || day >= len(labels) {
+		return "Unknown"
+	}
+	return labels[day]
+}
+
+func RecurringScheduleLabel(recurring scans.RecurringScan) string {
+	switch recurring.Frequency {
+	case scans.RecurringFrequencyHourly:
+		return fmt.Sprintf("Every hour at minute %02d", recurring.Minute)
+	case scans.RecurringFrequencyDaily:
+		return fmt.Sprintf("Daily at %02d:%02d", recurring.HourOfDay, recurring.Minute)
+	case scans.RecurringFrequencyWeekly:
+		return fmt.Sprintf("Weekly on %s at %02d:%02d", WeekdayLabel(recurring.DayOfWeek), recurring.HourOfDay, recurring.Minute)
+	case scans.RecurringFrequencyMonthly:
+		return fmt.Sprintf("Monthly on day %d at %02d:%02d", recurring.DayOfMonth, recurring.HourOfDay, recurring.Minute)
+	default:
+		return recurring.CronExpression
+	}
 }

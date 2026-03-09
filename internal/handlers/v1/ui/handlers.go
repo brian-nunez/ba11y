@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -100,8 +102,7 @@ func (h *Handler) NewScan(c echo.Context) error {
 		return err
 	}
 
-	form := pages.DefaultScanForm()
-	return h.render(c, pages.NewScanPage(sessionView(c), currentUser, recentScans, form, strings.TrimSpace(c.QueryParam("success")), strings.TrimSpace(c.QueryParam("error"))))
+	return h.render(c, pages.NewScanPage(sessionView(c), currentUser, recentScans, pages.DefaultScanForm(), strings.TrimSpace(c.QueryParam("success")), strings.TrimSpace(c.QueryParam("error"))))
 }
 
 func (h *Handler) CreateScan(c echo.Context) error {
@@ -134,6 +135,126 @@ func (h *Handler) CreateScan(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/scans/"+scan.ID+"/progress")
+}
+
+func (h *Handler) CreateRecurringScanFromReport(c echo.Context) error {
+	currentUser, ok := getCurrentUser(c)
+	if !ok {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
+
+	scan, err := h.scanService.GetScanForUser(c.Request().Context(), currentUser, c.Param("scanId"))
+	if err != nil {
+		if errors.Is(err, scans.ErrScanNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		if errors.Is(err, scans.ErrForbidden) {
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		}
+		return err
+	}
+
+	recurringForm := recurringScheduleFormFromRequest(c)
+	frequency, err := scans.ParseRecurringFrequency(recurringForm.Frequency)
+	if err != nil {
+		return redirectToScanReportWithMessage(c, scan.ID, "error", err.Error())
+	}
+
+	_, err = h.scanService.CreateRecurringScan(c.Request().Context(), currentUser, scans.CreateRecurringScanInput{
+		SourceScanID:         scan.ID,
+		OwnerUserID:          currentUser.ID,
+		OwnerEmail:           currentUser.Email,
+		Type:                 scan.Type,
+		Target:               scan.Target,
+		Standard:             scan.Standard,
+		IncludeBestPractices: scan.IncludeBestPractices,
+		Frequency:            frequency,
+		Timezone:             recurringForm.Timezone,
+		Minute:               recurringForm.Minute,
+		HourOfDay:            recurringForm.HourOfDay,
+		DayOfWeek:            recurringForm.DayOfWeek,
+		DayOfMonth:           recurringForm.DayOfMonth,
+	})
+	if err != nil {
+		return redirectToScanReportWithMessage(c, scan.ID, "error", err.Error())
+	}
+
+	return redirectToScanReportWithMessage(c, scan.ID, "success", "Recurring scan schedule created")
+}
+
+func (h *Handler) EnableRecurringScan(c echo.Context) error {
+	currentUser, ok := getCurrentUser(c)
+	if !ok {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
+
+	_, err := h.scanService.EnableRecurringScan(c.Request().Context(), currentUser, c.Param("recurringScanId"))
+	if err != nil {
+		return redirectToReturnPathWithMessage(c, "/scans/new", "error", err.Error())
+	}
+
+	return redirectToReturnPathWithMessage(c, "/scans/new", "success", "Recurring scan enabled")
+}
+
+func (h *Handler) DisableRecurringScan(c echo.Context) error {
+	currentUser, ok := getCurrentUser(c)
+	if !ok {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
+
+	_, err := h.scanService.DisableRecurringScan(c.Request().Context(), currentUser, c.Param("recurringScanId"))
+	if err != nil {
+		return redirectToReturnPathWithMessage(c, "/scans/new", "error", err.Error())
+	}
+
+	return redirectToReturnPathWithMessage(c, "/scans/new", "success", "Recurring scan disabled")
+}
+
+func (h *Handler) StopRecurringScan(c echo.Context) error {
+	currentUser, ok := getCurrentUser(c)
+	if !ok {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
+
+	_, err := h.scanService.StopRecurringScan(c.Request().Context(), currentUser, c.Param("recurringScanId"))
+	if err != nil {
+		return redirectToReturnPathWithMessage(c, "/scans/new", "error", err.Error())
+	}
+
+	return redirectToReturnPathWithMessage(c, "/scans/new", "success", "Recurring scan stopped")
+}
+
+func (h *Handler) RecurringScanWebhook(c echo.Context) error {
+	var payload scans.RecurringWebhookPayload
+	if err := c.Bind(&payload); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid webhook payload")
+	}
+
+	scan, err := h.scanService.TriggerRecurringScanFromWebhook(
+		c.Request().Context(),
+		payload,
+		c.Request().Header.Get("X-BA11Y-WEBHOOK-SECRET"),
+	)
+	if err != nil {
+		if errors.Is(err, scans.ErrInvalidWebhookSecret) {
+			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+		}
+		if errors.Is(err, scans.ErrRecurringScanNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		if errors.Is(err, scans.ErrRecurringScanInactive) {
+			return c.JSON(http.StatusOK, map[string]any{"message": "recurring scan is inactive"})
+		}
+		if errors.Is(err, scans.ErrInvalidRecurringSchedule) {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusAccepted, map[string]any{
+		"message": "scan queued",
+		"scanId":  scan.ID,
+	})
 }
 
 func (h *Handler) ScanHistory(c echo.Context) error {
@@ -195,7 +316,26 @@ func (h *Handler) ScanReport(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/scans/"+scan.ID+"/progress")
 	}
 
-	return h.render(c, pages.ScanReportPage(sessionView(c), currentUser, scan))
+	recurringScans, err := h.scanService.ListRecurringScansForScan(c.Request().Context(), currentUser, scan.ID)
+	if err != nil {
+		if errors.Is(err, scans.ErrScanNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		if errors.Is(err, scans.ErrForbidden) {
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		}
+		return err
+	}
+
+	return h.render(c, pages.ScanReportPage(
+		sessionView(c),
+		currentUser,
+		scan,
+		recurringScans,
+		pages.DefaultRecurringForm(),
+		strings.TrimSpace(c.QueryParam("success")),
+		strings.TrimSpace(c.QueryParam("error")),
+	))
 }
 
 func (h *Handler) ExportScanReport(c echo.Context) error {
@@ -287,7 +427,10 @@ func (h *Handler) render(c echo.Context, component interface {
 }
 
 func (h *Handler) renderNewScanWithError(c echo.Context, currentUser auth.User, form pages.ScanFormView, message string) error {
-	recentScans, _ := h.scanService.ListScansForUser(c.Request().Context(), currentUser)
+	recentScans, err := h.scanService.ListScansForUser(c.Request().Context(), currentUser)
+	if err != nil {
+		return err
+	}
 	return h.render(c, pages.NewScanPage(sessionView(c), currentUser, recentScans, form, "", message))
 }
 
@@ -324,5 +467,94 @@ func scanFormFromRequest(c echo.Context) pages.ScanFormView {
 		form.SelectedType = string(scans.ScanTypeWebPage)
 	}
 
+	if form.Standard == "" {
+		form.Standard = pages.DefaultScanForm().Standard
+	}
+
 	return form
+}
+
+func recurringScheduleFormFromRequest(c echo.Context) pages.RecurringFormView {
+	form := pages.DefaultRecurringForm()
+	form.Frequency = strings.TrimSpace(c.FormValue("frequency"))
+	form.Minute = parseIntOrDefault(c.FormValue("minute"), form.Minute)
+	form.HourOfDay = parseIntOrDefault(c.FormValue("hour_of_day"), form.HourOfDay)
+	form.DayOfWeek = parseIntOrDefault(c.FormValue("day_of_week"), form.DayOfWeek)
+	form.DayOfMonth = parseIntOrDefault(c.FormValue("day_of_month"), form.DayOfMonth)
+	form.Timezone = strings.TrimSpace(c.FormValue("timezone"))
+
+	if form.Frequency == "" {
+		form.Frequency = string(scans.RecurringFrequencyDaily)
+	}
+	if form.Timezone == "" {
+		form.Timezone = "UTC"
+	}
+
+	return form
+}
+
+func parseIntOrDefault(raw string, fallback int) int {
+	parsed, err := strconv.Atoi(strings.TrimSpace(raw))
+	if err != nil {
+		return fallback
+	}
+	return parsed
+}
+
+func redirectToNewScanWithMessage(c echo.Context, key string, message string) error {
+	return redirectWithMessage(c, "/scans/new", key, message)
+}
+
+func redirectToScanReportWithMessage(c echo.Context, scanID string, key string, message string) error {
+	scanID = strings.TrimSpace(scanID)
+	if scanID == "" {
+		return redirectWithMessage(c, "/scans/new", key, message)
+	}
+	return redirectWithMessage(c, "/scans/"+scanID+"/report", key, message)
+}
+
+func redirectToReturnPathWithMessage(c echo.Context, fallbackPath string, key string, message string) error {
+	returnPath := strings.TrimSpace(c.FormValue("return_to"))
+	if returnPath == "" {
+		returnPath = strings.TrimSpace(c.QueryParam("return_to"))
+	}
+	if !isSafeRelativePath(returnPath) {
+		returnPath = strings.TrimSpace(fallbackPath)
+	}
+	if !isSafeRelativePath(returnPath) {
+		returnPath = "/scans/new"
+	}
+	return redirectWithMessage(c, returnPath, key, message)
+}
+
+func redirectWithMessage(c echo.Context, basePath string, key string, message string) error {
+	basePath = strings.TrimSpace(basePath)
+	if !isSafeRelativePath(basePath) {
+		basePath = "/scans/new"
+	}
+
+	trimmedKey := strings.TrimSpace(key)
+	trimmedMessage := strings.TrimSpace(message)
+	if trimmedKey == "" || trimmedMessage == "" {
+		return c.Redirect(http.StatusSeeOther, basePath)
+	}
+
+	query := url.Values{}
+	query.Set(trimmedKey, trimmedMessage)
+	return c.Redirect(http.StatusSeeOther, basePath+"?"+query.Encode())
+}
+
+func isSafeRelativePath(path string) bool {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return false
+	}
+	if !strings.HasPrefix(path, "/") || strings.HasPrefix(path, "//") {
+		return false
+	}
+	parsed, err := url.Parse(path)
+	if err != nil {
+		return false
+	}
+	return parsed.Scheme == "" && parsed.Host == ""
 }

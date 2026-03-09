@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"slices"
 	"strings"
 	"sync"
@@ -17,32 +16,48 @@ import (
 	"github.com/brian-nunez/ba11y/internal/auth"
 	"github.com/brian-nunez/ba11y/internal/authorization"
 	"github.com/brian-nunez/bbaas-api/sdk/go/bbaas"
+	btick "github.com/brian-nunez/go-echo-starter-template/sdk/go/scheduler"
 	worker "github.com/brian-nunez/task-orchestration"
 )
 
 var (
-	ErrForbidden       = errors.New("forbidden")
-	ErrScanNotFound    = errors.New("scan not found")
-	ErrInvalidTarget   = errors.New("target is required")
-	ErrInvalidScanType = errors.New("invalid scan type")
+	ErrForbidden                = errors.New("forbidden")
+	ErrScanNotFound             = errors.New("scan not found")
+	ErrInvalidTarget            = errors.New("target is required")
+	ErrInvalidScanType          = errors.New("invalid scan type")
+	ErrRecurringScanNotFound    = errors.New("recurring scan not found")
+	ErrRecurringScanInactive    = errors.New("recurring scan is not enabled")
+	ErrInvalidRecurringSchedule = errors.New("invalid recurring schedule")
+	ErrRecurringFeatureDisabled = errors.New("recurring scans are not configured")
+	ErrInvalidWebhookSecret     = errors.New("invalid webhook secret")
 )
 
 type Config struct {
 	BBAASBaseURL       string
 	BBAASAPIToken      string
+	BTickBaseURL       string
+	BTickAPIKey        string
+	BTickWebhookURL    string
+	BTickWebhookSecret string
 	WorkerConcurrency  int
 	WorkerLogPath      string
 	WorkerDatabasePath string
 }
 
 type Service struct {
-	mu             sync.RWMutex
-	scansByID      map[string]*Scan
-	orderedScanIDs []string
+	mu                   sync.RWMutex
+	scansByID            map[string]*Scan
+	orderedScanIDs       []string
+	recurringByID        map[string]*RecurringScan
+	orderedRecurringIDs  []string
+	btickWebhookURL      string
+	btickWebhookSecret   string
+	btickAPIKeyAvailable bool
 
 	db         *sql.DB
 	authorizer *authorization.ScanAuthorizer
 	bbaas      *bbaas.Client
+	btick      *btick.Client
 	apiToken   string
 	workerPool *worker.WorkerPool
 	now        func() time.Time
@@ -51,11 +66,6 @@ type Service struct {
 func NewService(config Config, authorizer *authorization.ScanAuthorizer, db *sql.DB) (*Service, error) {
 	if db == nil {
 		return nil, fmt.Errorf("scan database is nil")
-	}
-
-	_ = os.Setenv("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")
-	if err := installPlaywrightDriver(); err != nil {
-		return nil, fmt.Errorf("install playwright driver: %w", err)
 	}
 
 	baseURL := strings.TrimSpace(config.BBAASBaseURL)
@@ -68,14 +78,29 @@ func NewService(config Config, authorizer *authorization.ScanAuthorizer, db *sql
 		return nil, fmt.Errorf("create bbaas client: %w", err)
 	}
 
+	var btickClient *btick.Client
+	btickBaseURL := strings.TrimSpace(config.BTickBaseURL)
+	if btickBaseURL != "" {
+		btickClient, err = btick.NewClient(btickBaseURL, btick.WithAPIKey(strings.TrimSpace(config.BTickAPIKey)))
+		if err != nil {
+			return nil, fmt.Errorf("create btick client: %w", err)
+		}
+	}
+
 	service := &Service{
-		scansByID:      make(map[string]*Scan),
-		orderedScanIDs: make([]string, 0),
-		db:             db,
-		authorizer:     authorizer,
-		bbaas:          client,
-		apiToken:       strings.TrimSpace(config.BBAASAPIToken),
-		now:            time.Now,
+		scansByID:            make(map[string]*Scan),
+		orderedScanIDs:       make([]string, 0),
+		recurringByID:        make(map[string]*RecurringScan),
+		orderedRecurringIDs:  make([]string, 0),
+		db:                   db,
+		authorizer:           authorizer,
+		bbaas:                client,
+		btick:                btickClient,
+		apiToken:             strings.TrimSpace(config.BBAASAPIToken),
+		now:                  time.Now,
+		btickWebhookURL:      strings.TrimSpace(config.BTickWebhookURL),
+		btickWebhookSecret:   strings.TrimSpace(config.BTickWebhookSecret),
+		btickAPIKeyAvailable: strings.TrimSpace(config.BTickAPIKey) != "",
 	}
 
 	if err := service.ensureSchema(context.Background()); err != nil {
@@ -84,6 +109,10 @@ func NewService(config Config, authorizer *authorization.ScanAuthorizer, db *sql
 
 	if err := service.loadScans(context.Background()); err != nil {
 		return nil, fmt.Errorf("load scans from sqlite: %w", err)
+	}
+
+	if err := service.loadRecurringScans(context.Background()); err != nil {
+		return nil, fmt.Errorf("load recurring scans from sqlite: %w", err)
 	}
 
 	concurrency := config.WorkerConcurrency
@@ -537,6 +566,33 @@ func (s *Service) ensureSchema(ctx context.Context) error {
 		);
 		`,
 		`CREATE INDEX IF NOT EXISTS idx_scan_findings_scan_order ON scan_findings(scan_id, sort_order);`,
+		`
+		CREATE TABLE IF NOT EXISTS recurring_scans (
+			id TEXT PRIMARY KEY,
+			source_scan_id TEXT NOT NULL DEFAULT '',
+			owner_user_id TEXT NOT NULL,
+			requested_by_email TEXT NOT NULL,
+			type TEXT NOT NULL,
+			target TEXT NOT NULL,
+			standard TEXT NOT NULL,
+			include_best_practices INTEGER NOT NULL DEFAULT 0,
+			frequency TEXT NOT NULL,
+			cron_expression TEXT NOT NULL,
+			timezone TEXT NOT NULL,
+			minute INTEGER NOT NULL,
+			hour_of_day INTEGER NOT NULL,
+			day_of_week INTEGER NOT NULL,
+			day_of_month INTEGER NOT NULL,
+			btick_job_id TEXT NOT NULL,
+			state TEXT NOT NULL,
+			last_triggered_at TEXT,
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL,
+			stopped_at TEXT
+		);
+		`,
+		`CREATE INDEX IF NOT EXISTS idx_recurring_scans_owner_user_id ON recurring_scans(owner_user_id);`,
+		`CREATE INDEX IF NOT EXISTS idx_recurring_scans_state ON recurring_scans(state);`,
 	}
 
 	for _, statement := range statements {
@@ -573,6 +629,18 @@ func (s *Service) ensureSchema(ctx context.Context) error {
 		return err
 	}
 	if err := s.ensureScanFindingsColumn(ctx, "raw_json", "TEXT NOT NULL DEFAULT '{}'"); err != nil {
+		return err
+	}
+	if err := s.ensureRecurringScansColumn(ctx, "include_best_practices", "INTEGER NOT NULL DEFAULT 0"); err != nil {
+		return err
+	}
+	if err := s.ensureRecurringScansColumn(ctx, "source_scan_id", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return err
+	}
+	if err := s.ensureRecurringScansColumn(ctx, "last_triggered_at", "TEXT"); err != nil {
+		return err
+	}
+	if err := s.ensureRecurringScansColumn(ctx, "stopped_at", "TEXT"); err != nil {
 		return err
 	}
 
@@ -1114,6 +1182,10 @@ func (s *Service) ensureScansColumn(ctx context.Context, columnName string, colu
 
 func (s *Service) ensureScanFindingsColumn(ctx context.Context, columnName string, columnDDL string) error {
 	return s.ensureTableColumn(ctx, "scan_findings", columnName, columnDDL)
+}
+
+func (s *Service) ensureRecurringScansColumn(ctx context.Context, columnName string, columnDDL string) error {
+	return s.ensureTableColumn(ctx, "recurring_scans", columnName, columnDDL)
 }
 
 func (s *Service) ensureTableColumn(ctx context.Context, tableName string, columnName string, columnDDL string) error {

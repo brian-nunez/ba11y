@@ -54,7 +54,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<main class=\"flex flex-1 justify-center px-4 py-10\"><div class=\"layout-content-container flex w-full max-w-[960px] flex-1 flex-col\"><div class=\"mb-2 p-4\"><p class=\"text-xs uppercase tracking-[0.14em] text-[#137fec] font-semibold\">Workspace</p><p class=\"text-sm text-slate-500\">Signed in as ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<main class=\"flex flex-1 justify-center px-4 py-10\"><div class=\"layout-content-container flex w-full max-w-[1040px] flex-1 flex-col gap-8\"><div class=\"mb-2 p-4\"><p class=\"text-xs uppercase tracking-[0.14em] text-[#137fec] font-semibold\">Workspace</p><p class=\"text-sm text-slate-500\">Signed in as ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -67,7 +67,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</p></div><div class=\"mb-5 flex flex-col gap-3 p-4\"><h1 class=\"text-[32px] font-bold leading-tight text-slate-900\">Start a new scan</h1><p class=\"text-base leading-normal text-slate-600\">Run an accessibility scan for a web page URL with configurable WCAG coverage.</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</p></div><div class=\"mb-5 flex flex-col gap-3 p-4\"><h1 class=\"text-[32px] font-bold leading-tight text-slate-900\">Scans</h1><p class=\"text-base leading-normal text-slate-600\">Run one-time accessibility scans and review results with detailed issue evidence.</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -109,7 +109,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<form action=\"/scans\" method=\"post\"><div class=\"px-4 pb-1\"><p class=\"mb-2 text-sm font-semibold text-slate-700\">Scan Type</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<section class=\"rounded-xl border border-slate-200 bg-white p-4\"><div class=\"mb-4 flex items-center justify-between\"><h2 class=\"text-xl font-bold text-slate-900\">Run One-Time Scan</h2><span class=\"text-xs font-semibold uppercase tracking-wider text-slate-500\">Immediate</span></div><form action=\"/scans\" method=\"post\"><div class=\"px-1 pb-1\"><p class=\"mb-2 text-sm font-semibold text-slate-700\">Scan Type</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -153,14 +153,14 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"><span class=\"material-symbols-outlined text-[16px]\">language</span></div><span class=\"text-sm font-semibold\">Web Page</span></label></div><input type=\"hidden\" name=\"scan_type\" value=\"webpage\"><div class=\"mt-6 rounded-xl border border-slate-200 bg-white p-4\"><h3 class=\"mb-4 flex items-center gap-2 text-lg font-bold\"><span class=\"material-symbols-outlined\">settings</span> Scan Configuration</h3><div class=\"space-y-6\"><div class=\"flex flex-col gap-2\"><label class=\"text-sm font-medium text-slate-700\">Website URL</label><div class=\"relative\"><span class=\"absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400\"><span class=\"material-symbols-outlined text-sm\">link</span></span> <input type=\"text\" name=\"target\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"><span class=\"material-symbols-outlined text-[16px]\">language</span></div><div class=\"flex flex-col gap-2\"><span class=\"text-sm font-semibold\">Web Page</span></div></label></div><input type=\"hidden\" name=\"scan_type\" value=\"webpage\"><div class=\"mt-4 space-y-6\"><div class=\"flex flex-col gap-2\"><label class=\"text-sm font-medium text-slate-700\">Website URL</label><div class=\"relative\"><span class=\"absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400\"><span class=\"material-symbols-outlined text-sm\">link</span></span> <input type=\"text\" name=\"target\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(form.Target)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 50, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 53, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -178,7 +178,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(standard)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 58, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 61, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -201,7 +201,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(standard)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 58, Col: 90}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_new.templ`, Line: 61, Col: 90}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -222,7 +222,7 @@ func NewScanPage(session SessionView, currentUser auth.User, recentScans []scans
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "> <span class=\"text-sm text-slate-600 group-hover:text-slate-900\">Include best-practice rules</span></label></div></div></div><div class=\"mt-8 flex items-center justify-between px-4\"><a href=\"/\" class=\"px-6 py-3 font-bold text-slate-600 hover:text-slate-900\">Cancel</a><div class=\"flex gap-4\"><button type=\"submit\" class=\"flex items-center gap-2 rounded-lg bg-[#137fec] px-10 py-3 font-bold text-white shadow-lg shadow-[#137fec]/20 hover:bg-[#0f72d6]\">Run Scan <span class=\"material-symbols-outlined\">rocket_launch</span></button></div></div></form></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "> <span class=\"text-sm text-slate-600 group-hover:text-slate-900\">Include best-practice rules</span></label></div></div><div class=\"mt-8 flex items-center justify-between px-1\"><a href=\"/\" class=\"px-6 py-3 font-bold text-slate-600 hover:text-slate-900\">Cancel</a><div class=\"flex gap-4\"><button type=\"submit\" class=\"flex items-center gap-2 rounded-lg bg-[#137fec] px-10 py-3 font-bold text-white shadow-lg shadow-[#137fec]/20 hover:bg-[#0f72d6]\">Run Scan <span class=\"material-symbols-outlined\">rocket_launch</span></button></div></div></form></section></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

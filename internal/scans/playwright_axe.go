@@ -79,10 +79,6 @@ func preparePageForAxe(page playwright.Page) error {
 	return nil
 }
 
-func installPlaywrightDriver() error {
-	return playwright.Install(&playwright.RunOptions{SkipInstallBrowsers: true})
-}
-
 func runAxeAudit(page playwright.Page, standard string, includeBestPractices bool) (AxeAuditResult, error) {
 	rawResult, err := page.Evaluate(`async (params) => {
 		if (typeof axe === "undefined") {
