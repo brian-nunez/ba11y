@@ -10,13 +10,14 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/brian-nunez/ba11y/internal/auth"
 	"github.com/brian-nunez/ba11y/internal/scans"
 )
 
-func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan) templ.Component {
+func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan, recurringScans []scans.RecurringScan, recurringScan *scans.RecurringScan, recurringManagePath string, successMessage string, errorMessage string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -64,536 +65,710 @@ func ScanReportPage(session SessionView, currentUser auth.User, scan scans.Scan)
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(scan.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 22, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 23, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></div><div class=\"mb-8 rounded-xl border border-[#137fec]/10 bg-white p-6 shadow-sm\"><div class=\"flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center\"><div class=\"flex flex-col gap-2\"><div class=\"flex items-center gap-3\"><h1 class=\"text-2xl font-black\">Accessibility Scan Results</h1>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 = []any{"rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider", RiskClass(scan.Summary)}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
+			if successMessage != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(successMessage)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 26, Col: 126}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			if errorMessage != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(errorMessage)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 29, Col: 112}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"mb-8 rounded-xl border border-[#137fec]/10 bg-white p-6 shadow-sm\"><div class=\"flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center\"><div class=\"flex flex-col gap-2\"><div class=\"flex items-center gap-3\"><h1 class=\"text-2xl font-black\">Accessibility Scan Results</h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span class=\"")
+			var templ_7745c5c3_Var6 = []any{"rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider", RiskClass(scan.Summary)}
+			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var4).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(RiskLabel(scan.Summary))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 29, Col: 143}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span></div><div class=\"flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-500\"><div class=\"flex items-center gap-1.5\"><span class=\"material-symbols-outlined text-[18px]\">link</span> <span class=\"font-medium text-[#137fec]\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<span class=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Target)
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var6).String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 34, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 1, Col: 0}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span></div><div class=\"flex items-center gap-1.5\"><span class=\"material-symbols-outlined text-[18px]\">calendar_today</span> <span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(FormattedScanTime(scan.CreatedAt))
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(RiskLabel(scan.Summary))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 38, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 36, Col: 143}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span></div><div class=\"flex items-center gap-1.5\"><span class=\"material-symbols-outlined text-[18px]\">person</span> <span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span></div><div class=\"flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-500\"><div class=\"flex items-center gap-1.5\"><span class=\"material-symbols-outlined text-[18px]\">link</span> <span class=\"font-medium text-[#137fec]\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(scan.RequestedByEmail)
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Target)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 42, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 41, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span></div></div></div><div class=\"flex w-full gap-3 lg:w-auto\"><a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span></div><div class=\"flex items-center gap-1.5\"><span class=\"material-symbols-outlined text-[18px]\">calendar_today</span> <span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var10 templ.SafeURL
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs("/scans/" + scan.ID + "/export")
+			var templ_7745c5c3_Var10 string
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(FormattedScanTime(scan.CreatedAt))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 47, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 45, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold hover:bg-slate-50 lg:flex-none\"><span class=\"material-symbols-outlined text-[20px]\">download</span> Export Report</a> <a href=\"/scans/new\" class=\"flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#137fec] px-4 py-2 text-sm font-bold text-white hover:opacity-90 lg:flex-none\"><span class=\"material-symbols-outlined text-[20px]\">refresh</span> Re-scan</a></div></div><div class=\"mt-8 grid grid-cols-2 gap-4 md:grid-cols-4\"><div class=\"rounded-xl border border-[#137fec]/10 bg-[#137fec]/5 p-4\"><span class=\"mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500\">Total Issues</span><div class=\"flex items-baseline gap-2\"><span class=\"text-3xl font-black\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span></div><div class=\"flex items-center gap-1.5\"><span class=\"material-symbols-outlined text-[18px]\">person</span> <span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Total))
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(scan.RequestedByEmail)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 60, Col: 113}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 49, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span><span class=\"text-xs font-bold text-emerald-500\">Live</span></div></div><div class=\"rounded-xl border border-red-500/10 bg-red-500/5 p-4\"><span class=\"mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500\">Critical</span><div class=\"flex items-baseline gap-2\"><span class=\"text-3xl font-black text-red-600\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span></div></div></div><div class=\"flex w-full gap-3 lg:w-auto\"><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Critical))
+			var templ_7745c5c3_Var12 templ.SafeURL
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(recurringManagePath)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 64, Col: 129}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 54, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span><span class=\"text-xs font-bold text-red-500\">Needs action</span></div></div><div class=\"rounded-xl border border-orange-500/10 bg-orange-500/5 p-4\"><span class=\"mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500\">Serious</span><div class=\"flex items-baseline gap-2\"><span class=\"text-3xl font-black text-orange-600\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"flex flex-1 items-center justify-center gap-2 rounded-lg border border-[#137fec]/30 bg-[#137fec]/5 px-4 py-2 text-sm font-bold text-[#137fec] hover:bg-[#137fec]/10 lg:flex-none\"><span class=\"material-symbols-outlined text-[20px]\">schedule</span> Recurring</a> <a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Serious))
+			var templ_7745c5c3_Var13 templ.SafeURL
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinURLErrs("/scans/" + scan.ID + "/export")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 68, Col: 131}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 58, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span><span class=\"text-xs font-bold text-emerald-500\">Review</span></div></div><div class=\"rounded-xl border border-slate-500/10 bg-slate-500/5 p-4\"><span class=\"mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500\">Moderate</span><div class=\"flex items-baseline gap-2\"><span class=\"text-3xl font-black text-slate-600\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold hover:bg-slate-50 lg:flex-none\"><span class=\"material-symbols-outlined text-[20px]\">download</span> Export Report</a> <a href=\"/scans/new\" class=\"flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#137fec] px-4 py-2 text-sm font-bold text-white hover:opacity-90 lg:flex-none\"><span class=\"material-symbols-outlined text-[20px]\">refresh</span> Re-scan</a></div></div><div class=\"mt-8 grid grid-cols-2 gap-4 md:grid-cols-4\"><div class=\"rounded-xl border border-[#137fec]/10 bg-[#137fec]/5 p-4\"><span class=\"mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500\">Total Issues</span><div class=\"flex items-baseline gap-2\"><span class=\"text-3xl font-black\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Moderate))
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Total))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 72, Col: 131}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 71, Col: 113}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span><span class=\"text-xs font-bold text-slate-500\">Monitor</span></div></div></div></div><div class=\"mb-8\"><h3 class=\"mb-4 text-lg font-bold\">Visual Evidence</h3><div class=\"grid gap-6 lg:grid-cols-3\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span><span class=\"text-xs font-bold text-emerald-500\">Live</span></div></div><div class=\"rounded-xl border border-red-500/10 bg-red-500/5 p-4\"><span class=\"mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500\">Critical</span><div class=\"flex items-baseline gap-2\"><span class=\"text-3xl font-black text-red-600\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var15 = []any{"rounded-xl border border-[#137fec]/10 bg-white p-5 shadow-sm",
-				templ.KV("lg:col-span-2", HasRecordingEvidence(scan)),
-				templ.KV("lg:col-span-3", !HasRecordingEvidence(scan)),
+			var templ_7745c5c3_Var15 string
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Critical))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 75, Col: 129}
 			}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var15...)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span><span class=\"text-xs font-bold text-red-500\">Needs action</span></div></div><div class=\"rounded-xl border border-orange-500/10 bg-orange-500/5 p-4\"><span class=\"mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500\">Serious</span><div class=\"flex items-baseline gap-2\"><span class=\"text-3xl font-black text-orange-600\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var16 string
-			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var15).String())
+			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Serious))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 1, Col: 0}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 79, Col: 131}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><div class=\"mb-4 flex items-center gap-2\"><span class=\"material-symbols-outlined text-[20px] text-[#137fec]\">grid_view</span> <span class=\"font-bold\">Responsive Screenshots</span></div><div class=\"grid grid-cols-1 gap-4 sm:grid-cols-3\"><div class=\"space-y-2\"><button type=\"button\" class=\"js-evidence-preview group relative aspect-video w-full cursor-zoom-in overflow-hidden rounded-lg border border-slate-200 bg-slate-100 text-left\" data-image-src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span><span class=\"text-xs font-bold text-emerald-500\">Review</span></div></div><div class=\"rounded-xl border border-slate-500/10 bg-slate-500/5 p-4\"><span class=\"mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500\">Moderate</span><div class=\"flex items-baseline gap-2\"><span class=\"text-3xl font-black text-slate-600\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var17 string
-			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.DesktopImageURL)
+			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Moderate))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 90, Col: 230}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 83, Col: 131}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" data-image-label=\"Desktop viewport (1440px)\"><img alt=\"Desktop screenshot\" class=\"h-full w-full object-cover transition-transform group-hover:scale-105\" src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</span><span class=\"text-xs font-bold text-slate-500\">Monitor</span></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var18 string
-			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.DesktopImageURL)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 91, Col: 154}
+			if recurringScan != nil {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"mb-8 rounded-xl border border-[#137fec]/20 bg-[#137fec]/5 p-4\"><div class=\"flex flex-wrap items-center justify-between gap-3\"><div><p class=\"text-xs font-semibold uppercase tracking-wide text-[#137fec]\">Recurring Trigger</p><p class=\"mt-1 text-sm text-slate-700\">This report was generated from recurring schedule #")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var18 string
+				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(recurringScan.ID)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 92, Col: 117}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, ".</p></div><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var19 templ.SafeURL
+				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs(recurringManagePath)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 94, Col: 37}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"inline-flex items-center gap-1 rounded-md border border-[#137fec]/30 bg-white px-3 py-2 text-sm font-semibold text-[#137fec] hover:bg-[#137fec]/10\">Manage Schedule <span class=\"material-symbols-outlined text-[16px]\">open_in_new</span></a></div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\"><div class=\"absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] text-white\">Desktop</div><div class=\"absolute right-2 top-2 inline-flex rounded-md bg-black/60 p-1 text-white\"><span class=\"material-symbols-outlined text-[16px]\">open_in_full</span></div></button><p class=\"text-center text-[11px] font-medium text-slate-500\">1440px</p></div><div class=\"space-y-2\"><button type=\"button\" class=\"js-evidence-preview group relative aspect-[3/4] w-full cursor-zoom-in overflow-hidden rounded-lg border border-slate-200 bg-slate-100 text-left\" data-image-src=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var19 string
-			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.TabletImageURL)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 100, Col: 229}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" data-image-label=\"Tablet viewport (768px)\"><img alt=\"Tablet screenshot\" class=\"h-full w-full object-cover transition-transform group-hover:scale-105\" src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div class=\"mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm\"><div class=\"mb-4 flex items-center justify-between\"><div><h3 class=\"text-lg font-bold text-slate-900\">Recurring Automation</h3><p class=\"mt-1 text-sm text-slate-500\">Create and manage scheduled scans for this exact result configuration.</p></div><span class=\"text-xs font-semibold uppercase tracking-wider text-slate-500\">Scheduled</span></div><div class=\"mb-5 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 md:grid-cols-3\"><div><p class=\"text-xs font-semibold uppercase tracking-wide text-slate-500\">Target</p><p class=\"font-medium text-slate-800\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var20 string
-			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.TabletImageURL)
+			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Target)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 101, Col: 152}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 112, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\"><div class=\"absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] text-white\">Tablet</div><div class=\"absolute right-2 top-2 inline-flex rounded-md bg-black/60 p-1 text-white\"><span class=\"material-symbols-outlined text-[16px]\">open_in_full</span></div></button><p class=\"text-center text-[11px] font-medium text-slate-500\">768px</p></div><div class=\"space-y-2\"><button type=\"button\" class=\"js-evidence-preview group relative aspect-[9/16] w-full cursor-zoom-in overflow-hidden rounded-lg border border-slate-200 bg-slate-100 text-left\" data-image-src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</p></div><div><p class=\"text-xs font-semibold uppercase tracking-wide text-slate-500\">WCAG Standard</p><p class=\"font-medium text-slate-800\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var21 string
-			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.MobileImageURL)
+			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Standard)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 110, Col: 230}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 116, Col: 61}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" data-image-label=\"Mobile viewport (375px)\"><img alt=\"Mobile screenshot\" class=\"h-full w-full object-cover transition-transform group-hover:scale-105\" src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</p></div><div><p class=\"text-xs font-semibold uppercase tracking-wide text-slate-500\">Best-Practice Rules</p><p class=\"font-medium text-slate-800\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var22 string
-			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.MobileImageURL)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 111, Col: 152}
+			if scan.IncludeBestPractices {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "Enabled")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "Disabled")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</p></div></div><div class=\"flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between\"><div><p class=\"text-sm text-slate-600\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\"><div class=\"absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] text-white\">Mobile</div><div class=\"absolute right-2 top-2 inline-flex rounded-md bg-black/60 p-1 text-white\"><span class=\"material-symbols-outlined text-[16px]\">open_in_full</span></div></button><p class=\"text-center text-[11px] font-medium text-slate-500\">375px</p></div></div></div>")
+			if len(recurringScans) == 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "No recurring schedules configured yet.")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else if len(recurringScans) == 1 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "1 recurring schedule configured.")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				var templ_7745c5c3_Var22 string
+				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(recurringScans)))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 137, Col: 45}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, " recurring schedules configured.")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</p></div><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if HasRecordingEvidence(scan) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"flex flex-col rounded-xl border border-[#137fec]/10 bg-white p-5 shadow-sm\"><div class=\"mb-4 flex items-center gap-2\"><span class=\"material-symbols-outlined text-[20px] text-red-500\">videocam</span> <span class=\"font-bold\">Scan Recording</span></div><div class=\"relative flex-1 overflow-hidden rounded-lg bg-slate-950\"><img alt=\"Scan recording\" class=\"h-full w-full object-cover opacity-60\" src=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var23 string
-				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.RecordingImageURL)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 128, Col: 120}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\"></div><p class=\"mt-3 text-[11px] italic text-slate-500\">Recording showing element interaction and automated scanner movement during Scan #")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var24 string
-				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(scan.ID)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 130, Col: 151}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, ".</p></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			var templ_7745c5c3_Var23 templ.SafeURL
+			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinURLErrs(recurringManagePath)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 141, Col: 36}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</div></div><div class=\"mb-4 text-sm text-slate-500\">Showing <span class=\"font-bold text-slate-900\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" class=\"inline-flex items-center justify-center gap-2 rounded-lg bg-[#137fec] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0f72d6]\"><span class=\"material-symbols-outlined text-[18px]\">tune</span> Manage Recurring Scans</a></div></div><div class=\"mb-8\"><h3 class=\"mb-4 text-lg font-bold\">Visual Evidence</h3><div class=\"grid gap-6 lg:grid-cols-3\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var24 = []any{"rounded-xl border border-[#137fec]/10 bg-white p-5 shadow-sm",
+				templ.KV("lg:col-span-2", HasRecordingEvidence(scan)),
+				templ.KV("lg:col-span-3", !HasRecordingEvidence(scan)),
+			}
+			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var24...)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<div class=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var25 string
-			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Total))
+			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var24).String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 135, Col: 125}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 1, Col: 0}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</span> violations</div><div class=\"overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm\"><div class=\"overflow-x-auto\"><table class=\"w-full border-collapse text-left\"><thead><tr class=\"border-b border-slate-200 bg-slate-50\"><th class=\"px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500\">Violation Details</th><th class=\"px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500\">Severity</th><th class=\"px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500\">Standard</th><th class=\"px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500\">Method</th></tr></thead> <tbody class=\"divide-y divide-slate-100\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\"><div class=\"mb-4 flex items-center gap-2\"><span class=\"material-symbols-outlined text-[20px] text-[#137fec]\">grid_view</span> <span class=\"font-bold\">Responsive Screenshots</span></div><div class=\"grid grid-cols-1 gap-4 sm:grid-cols-3\"><div class=\"space-y-2\"><button type=\"button\" class=\"js-evidence-preview group relative aspect-video w-full cursor-zoom-in overflow-hidden rounded-lg border border-slate-200 bg-slate-100 text-left\" data-image-src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var26 string
+			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.DesktopImageURL)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 161, Col: 230}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" data-image-label=\"Desktop viewport (1440px)\"><img alt=\"Desktop screenshot\" class=\"h-full w-full object-cover transition-transform group-hover:scale-105\" src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var27 string
+			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.DesktopImageURL)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 162, Col: 154}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\"><div class=\"absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] text-white\">Desktop</div><div class=\"absolute right-2 top-2 inline-flex rounded-md bg-black/60 p-1 text-white\"><span class=\"material-symbols-outlined text-[16px]\">open_in_full</span></div></button><p class=\"text-center text-[11px] font-medium text-slate-500\">1440px</p></div><div class=\"space-y-2\"><button type=\"button\" class=\"js-evidence-preview group relative aspect-[3/4] w-full cursor-zoom-in overflow-hidden rounded-lg border border-slate-200 bg-slate-100 text-left\" data-image-src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var28 string
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.TabletImageURL)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 171, Col: 229}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" data-image-label=\"Tablet viewport (768px)\"><img alt=\"Tablet screenshot\" class=\"h-full w-full object-cover transition-transform group-hover:scale-105\" src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var29 string
+			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.TabletImageURL)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 172, Col: 152}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\"><div class=\"absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] text-white\">Tablet</div><div class=\"absolute right-2 top-2 inline-flex rounded-md bg-black/60 p-1 text-white\"><span class=\"material-symbols-outlined text-[16px]\">open_in_full</span></div></button><p class=\"text-center text-[11px] font-medium text-slate-500\">768px</p></div><div class=\"space-y-2\"><button type=\"button\" class=\"js-evidence-preview group relative aspect-[9/16] w-full cursor-zoom-in overflow-hidden rounded-lg border border-slate-200 bg-slate-100 text-left\" data-image-src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var30 string
+			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.MobileImageURL)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 181, Col: 230}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\" data-image-label=\"Mobile viewport (375px)\"><img alt=\"Mobile screenshot\" class=\"h-full w-full object-cover transition-transform group-hover:scale-105\" src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var31 string
+			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.MobileImageURL)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 182, Col: 152}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\"><div class=\"absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] text-white\">Mobile</div><div class=\"absolute right-2 top-2 inline-flex rounded-md bg-black/60 p-1 text-white\"><span class=\"material-symbols-outlined text-[16px]\">open_in_full</span></div></button><p class=\"text-center text-[11px] font-medium text-slate-500\">375px</p></div></div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if HasRecordingEvidence(scan) {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<div class=\"flex flex-col rounded-xl border border-[#137fec]/10 bg-white p-5 shadow-sm\"><div class=\"mb-4 flex items-center gap-2\"><span class=\"material-symbols-outlined text-[20px] text-red-500\">videocam</span> <span class=\"font-bold\">Scan Recording</span></div><div class=\"relative flex-1 overflow-hidden rounded-lg bg-slate-950\"><img alt=\"Scan recording\" class=\"h-full w-full object-cover opacity-60\" src=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var32 string
+				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Evidence.RecordingImageURL)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 199, Col: 120}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\"></div><p class=\"mt-3 text-[11px] italic text-slate-500\">Recording showing element interaction and automated scanner movement during Scan #")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var33 string
+				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(scan.ID)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 201, Col: 151}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, ".</p></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "</div></div><div class=\"mb-4 text-sm text-slate-500\">Showing <span class=\"font-bold text-slate-900\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var34 string
+			templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Summary.Total))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 206, Col: 125}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</span> violations</div><div class=\"overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm\"><div class=\"overflow-x-auto\"><table class=\"w-full border-collapse text-left\"><thead><tr class=\"border-b border-slate-200 bg-slate-50\"><th class=\"px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500\">Violation Details</th><th class=\"px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500\">Severity</th><th class=\"px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500\">Standard</th><th class=\"px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500\">Method</th></tr></thead> <tbody class=\"divide-y divide-slate-100\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(scan.Findings) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<tr><td class=\"px-6 py-8 text-sm text-slate-500\" colspan=\"5\">No violations were found for this run.</td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<tr><td class=\"px-6 py-8 text-sm text-slate-500\" colspan=\"5\">No violations were found for this run.</td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
 				for _, finding := range scan.Findings {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<tr class=\"align-top transition-colors hover:bg-slate-50/50\"><td class=\"px-6 py-5\"><div class=\"max-w-2xl space-y-2\"><div class=\"flex flex-wrap items-center gap-2\"><a href=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "<tr class=\"align-top transition-colors hover:bg-slate-50/50\"><td class=\"px-6 py-5\"><div class=\"max-w-2xl space-y-2\"><div class=\"flex flex-wrap items-center gap-2\"><a href=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var26 templ.SafeURL
-					templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinURLErrs(finding.HelpURL)
+					var templ_7745c5c3_Var35 templ.SafeURL
+					templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinURLErrs(finding.HelpURL)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 159, Col: 40}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[#137fec] underline hover:no-underline hover:text-cyan-800\" title=\"Open axe-core help\"><span class=\"block font-bold\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var27 string
-					templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Title)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 160, Col: 61}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</span></a> ")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					if strings.TrimSpace(finding.RuleID) != "" {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<span class=\"rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-700\">")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						var templ_7745c5c3_Var28 string
-						templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(finding.RuleID)
-						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 163, Col: 119}
-						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</span>")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</div>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					if len(finding.Tags) > 0 {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<p class=\"text-xs text-slate-500\"><span class=\"font-semibold text-slate-600\">Tags:</span> ")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						var templ_7745c5c3_Var29 string
-						templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(finding.Tags, ", "))
-						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 167, Col: 139}
-						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</p>")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					}
-					if len(finding.Targets) > 0 {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<p class=\"text-xs text-slate-500\"><span class=\"font-semibold text-slate-600\">Targets:</span> ")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						var templ_7745c5c3_Var30 string
-						templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(finding.Targets, ", "))
-						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 170, Col: 145}
-						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</p>")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					}
-					if strings.TrimSpace(finding.NodeHTML) != "" {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<div class=\"overflow-x-auto whitespace-nowrap rounded border border-slate-200 bg-slate-100 p-2 font-mono text-[11px] text-slate-700\">")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						var templ_7745c5c3_Var31 string
-						templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(finding.NodeHTML)
-						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 173, Col: 166}
-						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</div>")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					} else if strings.TrimSpace(finding.Snippet) != "" {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div class=\"overflow-x-auto whitespace-nowrap rounded border border-slate-200 bg-slate-100 p-2 font-mono text-[11px] text-slate-700\">")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						var templ_7745c5c3_Var32 string
-						templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Snippet)
-						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 175, Col: 165}
-						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</div>")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<p class=\"text-sm text-slate-600\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var33 string
-					templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Description)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 177, Col: 69}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "</p></div></td><td class=\"px-6 py-5\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var34 = []any{"inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-bold", SeverityBadgeClass(finding.Severity)}
-					templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var34...)
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<span class=\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var35 string
-					templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var34).String())
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 1, Col: 0}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 230, Col: 40}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[#137fec] underline hover:no-underline hover:text-cyan-800\" title=\"Open axe-core help\"><span class=\"block font-bold\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var36 string
-					templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(SeverityLabel(finding.Severity))
+					templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 181, Col: 178}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 231, Col: 61}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</span></td><td class=\"px-6 py-5\"><div class=\"flex min-w-[180px] flex-col\"><span class=\"text-sm font-medium text-slate-700\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</span></a> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var37 string
-					templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Standard)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 185, Col: 81}
+					if strings.TrimSpace(finding.RuleID) != "" {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<span class=\"rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-700\">")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var37 string
+						templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(finding.RuleID)
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 234, Col: 119}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "</span>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "</span> <span class=\"text-[11px] text-slate-400\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var38 string
-					templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Criterion)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 186, Col: 74}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "</span></div></td><td class=\"px-6 py-5\"><span class=\"inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-xs font-medium text-slate-500\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "</div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var39 string
-					templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(MethodLabel(finding.Method))
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 190, Col: 178}
+					if len(finding.Tags) > 0 {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<p class=\"text-xs text-slate-500\"><span class=\"font-semibold text-slate-600\">Tags:</span> ")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var38 string
+						templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(finding.Tags, ", "))
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 238, Col: 139}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "</p>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
+					if len(finding.Targets) > 0 {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "<p class=\"text-xs text-slate-500\"><span class=\"font-semibold text-slate-600\">Targets:</span> ")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var39 string
+						templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(finding.Targets, ", "))
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 241, Col: 145}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "</p>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+					if strings.TrimSpace(finding.NodeHTML) != "" {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "<div class=\"overflow-x-auto whitespace-nowrap rounded border border-slate-200 bg-slate-100 p-2 font-mono text-[11px] text-slate-700\">")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var40 string
+						templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(finding.NodeHTML)
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 244, Col: 166}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "</div>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					} else if strings.TrimSpace(finding.Snippet) != "" {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "<div class=\"overflow-x-auto whitespace-nowrap rounded border border-slate-200 bg-slate-100 p-2 font-mono text-[11px] text-slate-700\">")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var41 string
+						templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Snippet)
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 246, Col: 165}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "</div>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, "<p class=\"text-sm text-slate-600\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "</span></td></tr>")
+					var templ_7745c5c3_Var42 string
+					templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Description)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 248, Col: 69}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "</p></div></td><td class=\"px-6 py-5\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var43 = []any{"inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-bold", SeverityBadgeClass(finding.Severity)}
+					templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var43...)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, "<span class=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var44 string
+					templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var43).String())
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 1, Col: 0}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var45 string
+					templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(SeverityLabel(finding.Severity))
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 252, Col: 178}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "</span></td><td class=\"px-6 py-5\"><div class=\"flex min-w-[180px] flex-col\"><span class=\"text-sm font-medium text-slate-700\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var46 string
+					templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Standard)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 256, Col: 81}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "</span> <span class=\"text-[11px] text-slate-400\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var47 string
+					templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Criterion)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 257, Col: 74}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "</span></div></td><td class=\"px-6 py-5\"><span class=\"inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-xs font-medium text-slate-500\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var48 string
+					templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(MethodLabel(finding.Method))
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_report.templ`, Line: 261, Col: 178}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "</span></td></tr>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</tbody></table></div></div></main><footer class=\"mt-auto border-t border-slate-200 bg-white py-10\"><div class=\"mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 md:flex-row md:px-8\"><div class=\"flex items-center gap-2 text-slate-400\"><span class=\"material-symbols-outlined text-[20px]\">visibility</span> <span class=\"text-sm\">© 2026 A11y Scanner Enterprise</span></div></div></footer></div></div><div id=\"evidence-preview-modal\" class=\"fixed inset-0 z-[70] hidden items-center justify-center bg-slate-950/75 p-4\"><div class=\"relative w-full max-w-6xl rounded-xl bg-white p-4 shadow-2xl\"><button id=\"evidence-preview-close\" type=\"button\" class=\"absolute right-3 top-3 rounded-md border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50\"><span class=\"material-symbols-outlined text-[18px]\">close</span></button><div class=\"flex max-h-[80vh] items-center justify-center overflow-hidden rounded-lg bg-slate-100\"><img id=\"evidence-preview-image\" alt=\"Evidence preview\" class=\"max-h-[80vh] w-auto max-w-full object-contain\"></div><p id=\"evidence-preview-label\" class=\"mt-3 text-center text-sm font-medium text-slate-600\"></p></div></div><script>\n\t\t\t(function () {\n\t\t\t\tconst modal = document.getElementById(\"evidence-preview-modal\");\n\t\t\t\tconst modalImage = document.getElementById(\"evidence-preview-image\");\n\t\t\t\tconst modalLabel = document.getElementById(\"evidence-preview-label\");\n\t\t\t\tconst closeButton = document.getElementById(\"evidence-preview-close\");\n\t\t\t\tconst previewTriggers = document.querySelectorAll(\".js-evidence-preview\");\n\n\t\t\t\tif (!modal || !modalImage || !modalLabel || !closeButton || previewTriggers.length === 0) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tfunction closeModal() {\n\t\t\t\t\tmodal.classList.add(\"hidden\");\n\t\t\t\t\tmodal.classList.remove(\"flex\");\n\t\t\t\t\tmodalImage.setAttribute(\"src\", \"\");\n\t\t\t\t\tmodalLabel.textContent = \"\";\n\t\t\t\t}\n\n\t\t\t\tfunction openModal(src, label) {\n\t\t\t\t\tif (!src || src.trim() === \"\") {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tmodalImage.setAttribute(\"src\", src);\n\t\t\t\t\tmodalLabel.textContent = label || \"\";\n\t\t\t\t\tmodal.classList.remove(\"hidden\");\n\t\t\t\t\tmodal.classList.add(\"flex\");\n\t\t\t\t}\n\n\t\t\t\tfor (const trigger of previewTriggers) {\n\t\t\t\t\ttrigger.addEventListener(\"click\", function () {\n\t\t\t\t\t\topenModal(trigger.getAttribute(\"data-image-src\"), trigger.getAttribute(\"data-image-label\"));\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tcloseButton.addEventListener(\"click\", closeModal);\n\t\t\t\tmodal.addEventListener(\"click\", function (event) {\n\t\t\t\t\tif (event.target === modal) {\n\t\t\t\t\t\tcloseModal();\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t\tdocument.addEventListener(\"keydown\", function (event) {\n\t\t\t\t\tif (event.key === \"Escape\") {\n\t\t\t\t\t\tcloseModal();\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t})();\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "</tbody></table></div></div></main><footer class=\"mt-auto border-t border-slate-200 bg-white py-10\"><div class=\"mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 md:flex-row md:px-8\"><div class=\"flex items-center gap-2 text-slate-400\"><span class=\"material-symbols-outlined text-[20px]\">visibility</span> <span class=\"text-sm\">© 2026 A11y Scanner Enterprise</span></div></div></footer></div></div><div id=\"evidence-preview-modal\" class=\"fixed inset-0 z-[70] hidden items-center justify-center bg-slate-950/75 p-4\"><div class=\"relative w-full max-w-6xl rounded-xl bg-white p-4 shadow-2xl\"><button id=\"evidence-preview-close\" type=\"button\" class=\"absolute right-3 top-3 rounded-md border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50\"><span class=\"material-symbols-outlined text-[18px]\">close</span></button><div class=\"flex max-h-[80vh] items-center justify-center overflow-hidden rounded-lg bg-slate-100\"><img id=\"evidence-preview-image\" alt=\"Evidence preview\" class=\"max-h-[80vh] w-auto max-w-full object-contain\"></div><p id=\"evidence-preview-label\" class=\"mt-3 text-center text-sm font-medium text-slate-600\"></p></div></div><script>\n\t\t\t(function () {\n\t\t\t\tconst modal = document.getElementById(\"evidence-preview-modal\");\n\t\t\t\tconst modalImage = document.getElementById(\"evidence-preview-image\");\n\t\t\t\tconst modalLabel = document.getElementById(\"evidence-preview-label\");\n\t\t\t\tconst closeButton = document.getElementById(\"evidence-preview-close\");\n\t\t\t\tconst previewTriggers = document.querySelectorAll(\".js-evidence-preview\");\n\n\t\t\t\tif (!modal || !modalImage || !modalLabel || !closeButton || previewTriggers.length === 0) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tfunction closeModal() {\n\t\t\t\t\tmodal.classList.add(\"hidden\");\n\t\t\t\t\tmodal.classList.remove(\"flex\");\n\t\t\t\t\tmodalImage.setAttribute(\"src\", \"\");\n\t\t\t\t\tmodalLabel.textContent = \"\";\n\t\t\t\t}\n\n\t\t\t\tfunction openModal(src, label) {\n\t\t\t\t\tif (!src || src.trim() === \"\") {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tmodalImage.setAttribute(\"src\", src);\n\t\t\t\t\tmodalLabel.textContent = label || \"\";\n\t\t\t\t\tmodal.classList.remove(\"hidden\");\n\t\t\t\t\tmodal.classList.add(\"flex\");\n\t\t\t\t}\n\n\t\t\t\tfor (const trigger of previewTriggers) {\n\t\t\t\t\ttrigger.addEventListener(\"click\", function () {\n\t\t\t\t\t\topenModal(trigger.getAttribute(\"data-image-src\"), trigger.getAttribute(\"data-image-label\"));\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tcloseButton.addEventListener(\"click\", closeModal);\n\t\t\t\tmodal.addEventListener(\"click\", function (event) {\n\t\t\t\t\tif (event.target === modal) {\n\t\t\t\t\t\tcloseModal();\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t\tdocument.addEventListener(\"keydown\", function (event) {\n\t\t\t\t\tif (event.key === \"Escape\") {\n\t\t\t\t\t\tcloseModal();\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t})();\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

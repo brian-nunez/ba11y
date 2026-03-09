@@ -2,6 +2,7 @@ package scans
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -56,9 +57,9 @@ func (t *scanTask) Process(ctx context.Context, pc *worker.ProcessContext) error
 	_ = pc.Logger(fmt.Sprintf("Spawned browser %s", spawned.Browser.ID))
 
 	t.service.updateStage(t.scanID, 28, "Booting Playwright runtime")
-	pw, err := playwright.Run()
+	pw, err := t.service.startPlaywrightRuntime()
 	if err != nil {
-		t.service.failScan(t.scanID, "Could not start Playwright runtime")
+		t.service.failScan(t.scanID, formatPlaywrightRuntimeFailure(err))
 		return fmt.Errorf("run playwright: %w", err)
 	}
 	defer func() {
@@ -149,4 +150,33 @@ func (t *scanTask) isCanceled() bool {
 
 func ptr[T any](value T) *T {
 	return &value
+}
+
+func (s *Service) startPlaywrightRuntime() (*playwright.Playwright, error) {
+	return playwright.Run()
+}
+
+func formatPlaywrightRuntimeFailure(err error) string {
+	const maxPlaywrightFailureMessageLength = 220
+
+	if err == nil {
+		return "Could not start Playwright runtime"
+	}
+
+	message := strings.TrimSpace(err.Error())
+	if message == "" {
+		return "Could not start Playwright runtime"
+	}
+
+	message = strings.ReplaceAll(message, "\n", " ")
+	message = strings.Join(strings.Fields(message), " ")
+	if len(message) > maxPlaywrightFailureMessageLength {
+		message = message[:maxPlaywrightFailureMessageLength] + "..."
+	}
+
+	if errors.Is(err, ErrInvalidTarget) {
+		return "Could not start Playwright runtime"
+	}
+
+	return "Could not start Playwright runtime: " + message
 }

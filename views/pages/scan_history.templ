@@ -41,6 +41,9 @@ templ ScanHistoryPage(session SessionView, currentUser auth.User, recentScans []
 									<td class="px-5 py-4">
 										<p class="font-semibold text-slate-800">{ scan.Target }</p>
 										<p class="text-xs text-slate-500">#{ scan.ID }</p>
+										if scan.RecurringScanID != "" {
+											<p class="mt-1 text-xs font-semibold text-[#137fec]">Recurring run · schedule #{ scan.RecurringScanID }</p>
+										}
 									</td>
 									<td class="px-5 py-4 text-sm text-slate-700">{ HumanScanType(scan.Type) }</td>
 									<td class="px-5 py-4">

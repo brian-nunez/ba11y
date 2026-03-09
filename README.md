@@ -27,6 +27,8 @@ This app is intentionally wired to my libraries:
   - Import: `github.com/brian-nunez/task-orchestration`
 - `baccess` for RBAC/ABAC authorization checks
   - Import: `github.com/brian-nunez/baccess`
+- `btick` Scheduler SDK for recurring cron registration
+  - Import: `github.com/brian-nunez/btick/sdk/go/scheduler`
 
 ## Auth Flow
 
@@ -49,12 +51,25 @@ This app is intentionally wired to my libraries:
 6. Progress is polled from `/api/v1/scans/:scanId/status`
 7. Completed scans render detailed reports at `/scans/:scanId/report`
 
+## Recurring Scan Flow
+
+1. User opens recurring automation from a scan report (`/scans/:scanId/report` -> `Recurring`)
+2. App validates UI-limited frequency (`hourly`, `daily`, `weekly`, `monthly`) and builds a cron expression
+3. App registers a btick job that `POST`s to `BTICK_WEBHOOK_URL` (recommended: `/api/v1/recurring-scans/webhook`)
+4. btick triggers webhook on schedule with recurring scan metadata
+5. Webhook handler verifies optional secret (`X-BA11Y-WEBHOOK-SECRET`) and queues a normal scan
+6. User can edit/enable/disable/stop recurring schedules from `/scans/:scanId/recurring`
+
 ## Environment Variables
 
 - `PORT` (default: `8090`)
 - `APP_DATABASE_PATH` (default: `./data/ba11y.db`)
 - `BBAAS_BASE_URL` (default: `http://127.0.0.1:8080`)
 - `BBAAS_API_TOKEN` (preferred) or `BBAAS_API_KEY` (fallback; required to run scans)
+- `BTICK_BASE_URL` (default: empty; required for recurring scans)
+- `BTICK_API_KEY` (preferred) or `BTICK_API_TOKEN` (fallback; required for recurring scans)
+- `BTICK_WEBHOOK_URL` (required for recurring scans; btick callback URL to this app, e.g. `https://your-a11y-host/api/v1/recurring-scans/webhook`)
+- `BTICK_WEBHOOK_SECRET` (optional; validated against request header `X-BA11Y-WEBHOOK-SECRET`)
 - `SCAN_WORKER_CONCURRENCY` (default: `3`)
 - `SCAN_WORKER_LOG_PATH` (default: `./data/logs`)
 - `SCAN_WORKER_DB_PATH` (default: same as `APP_DATABASE_PATH`)
@@ -66,6 +81,7 @@ All app state is persisted in SQLite:
 - scan requests and scan progress metadata
 - scan evidence metadata
 - full scan findings/results
+- recurring scan schedules and lifecycle metadata
 
 ## Local Development
 
@@ -79,6 +95,7 @@ All app state is persisted in SQLite:
 Notes:
 - The app installs the Playwright driver automatically with `SkipInstallBrowsers=true`.
 - Browser binaries are not installed locally; scans run in your spawned BaaS browser via CDP.
+- Recurring execution depends on btick's worker process. If btick API is running without its worker, jobs are created but no webhooks are fired.
 
 ### Install dependencies
 
@@ -113,3 +130,4 @@ UI routes:
 API routes:
 - `/api/v1/health`
 - `/api/v1/scans/:scanId/status`
+- `/api/v1/recurring-scans/webhook`

@@ -6,7 +6,7 @@ import (
 	"github.com/brian-nunez/ba11y/internal/scans"
 )
 
-templ ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Scan) {
+templ ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Scan, recurringScan *scans.RecurringScan, recurringManagePath string) {
 	@Layout("Accessibility Scan in Progress") {
 		<div class="relative min-h-screen overflow-hidden" id="scan-progress-page" data-scan-id={ scan.ID } data-report-url={ "/scans/" + scan.ID + "/report" }>
 			<div class="fixed top-0 left-0 z-50 h-1 w-full bg-gradient-to-r from-[#137fec]/20 via-[#137fec] to-[#137fec]/20"></div>
@@ -26,6 +26,18 @@ templ ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Sc
 							<p class="mt-2 text-slate-500">Scan target: { scan.Target }</p>
 						<p class="mt-1 text-xs text-slate-400">Requested by { currentUser.Email }</p>
 					</div>
+					if recurringScan != nil {
+						<div class="mb-6 rounded-lg border border-[#137fec]/20 bg-[#137fec]/5 px-4 py-3">
+							<p class="text-xs font-semibold uppercase tracking-wide text-[#137fec]">Recurring Trigger</p>
+							<div class="mt-1 flex flex-wrap items-center justify-between gap-2">
+								<p class="text-sm text-slate-700">This run was triggered by recurring schedule #{ recurringScan.ID }.</p>
+								<a href={ recurringManagePath } class="inline-flex items-center gap-1 text-sm font-semibold text-[#137fec] hover:underline">
+									Manage Schedule
+									<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+								</a>
+							</div>
+						</div>
+					}
 
 					<div class="mb-10">
 						<div class="mb-2 flex items-center justify-between">

@@ -14,7 +14,7 @@ import (
 	"github.com/brian-nunez/ba11y/internal/scans"
 )
 
-func ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Scan) templ.Component {
+func ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Scan, recurringScan *scans.RecurringScan, recurringManagePath string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -107,134 +107,170 @@ func ScanProgressPage(session SessionView, currentUser auth.User, scan scans.Sca
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</p></div><div class=\"mb-10\"><div class=\"mb-2 flex items-center justify-between\"><span id=\"progress-label\" class=\"text-sm font-semibold text-[#137fec]\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(ScanProgressLabel(scan))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 32, Col: 103}
+			if recurringScan != nil {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"mb-6 rounded-lg border border-[#137fec]/20 bg-[#137fec]/5 px-4 py-3\"><p class=\"text-xs font-semibold uppercase tracking-wide text-[#137fec]\">Recurring Trigger</p><div class=\"mt-1 flex flex-wrap items-center justify-between gap-2\"><p class=\"text-sm text-slate-700\">This run was triggered by recurring schedule #")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 string
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(recurringScan.ID)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 33, Col: 106}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, ".</p><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var8 templ.SafeURL
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(recurringManagePath)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 34, Col: 37}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"inline-flex items-center gap-1 text-sm font-semibold text-[#137fec] hover:underline\">Manage Schedule <span class=\"material-symbols-outlined text-[16px]\">open_in_new</span></a></div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span> <span id=\"eta-label\" class=\"text-sm font-medium text-slate-500\">Estimated time: <span id=\"eta-seconds\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%ds", max(5, (100-scan.Progress)*2)))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 33, Col: 161}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span> remaining</span></div><div class=\"h-5 w-full overflow-hidden rounded-full bg-slate-100 p-1 shadow-inner\"><div id=\"progress-fill\" class=\"relative h-full rounded-full bg-[#137fec] shadow-[0_0_12px_rgba(19,127,236,0.4)] transition-all duration-700\" style=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"mb-10\"><div class=\"mb-2 flex items-center justify-between\"><span id=\"progress-label\" class=\"text-sm font-semibold text-[#137fec]\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width:%d%%", scan.Progress))
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(ScanProgressLabel(scan))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 36, Col: 196}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 44, Col: 103}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><div class=\"absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent\"></div></div></div></div><div class=\"flex flex-col items-center justify-center space-y-6 py-12\"><div class=\"relative\"><div class=\"absolute inset-0 animate-pulse rounded-full bg-[#137fec]/20 blur-2xl\"></div><div class=\"relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#137fec]/20 bg-white\"><span id=\"activity-icon\" class=\"material-symbols-outlined animate-spin text-4xl text-[#137fec]\" style=\"animation-duration: 3s;\">progress_activity</span></div></div><div class=\"space-y-1 text-center\"><p id=\"stage-label\" class=\"text-sm font-medium text-slate-600\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span> <span id=\"eta-label\" class=\"text-sm font-medium text-slate-500\">Estimated time: <span id=\"eta-seconds\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Stage)
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%ds", max(5, (100-scan.Progress)*2)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 50, Col: 82}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 45, Col: 161}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</p><p class=\"text-xs text-slate-400\">This will only take a moment</p></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span> remaining</span></div><div class=\"h-5 w-full overflow-hidden rounded-full bg-slate-100 p-1 shadow-inner\"><div id=\"progress-fill\" class=\"relative h-full rounded-full bg-[#137fec] shadow-[0_0_12px_rgba(19,127,236,0.4)] transition-all duration-700\" style=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var11 = []any{templ.KV("hidden", scan.Status != scans.ScanStatusFailed && scan.Status != scans.ScanStatusCanceled), "rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var11...)
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width:%d%%", scan.Progress))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 48, Col: 196}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div id=\"error-panel\" class=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"><div class=\"absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent\"></div></div></div></div><div class=\"flex flex-col items-center justify-center space-y-6 py-12\"><div class=\"relative\"><div class=\"absolute inset-0 animate-pulse rounded-full bg-[#137fec]/20 blur-2xl\"></div><div class=\"relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#137fec]/20 bg-white\"><span id=\"activity-icon\" class=\"material-symbols-outlined animate-spin text-4xl text-[#137fec]\" style=\"animation-duration: 3s;\">progress_activity</span></div></div><div class=\"space-y-1 text-center\"><p id=\"stage-label\" class=\"text-sm font-medium text-slate-600\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var11).String())
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Stage)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 1, Col: 0}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 62, Col: 82}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"><p id=\"error-title\" class=\"font-semibold\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</p><p class=\"text-xs text-slate-400\">This will only take a moment</p></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if scan.Status == scans.ScanStatusCanceled {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "Scan canceled")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "Scan failed")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</p><p id=\"error-message\">")
+			var templ_7745c5c3_Var13 = []any{templ.KV("hidden", scan.Status != scans.ScanStatusFailed && scan.Status != scans.ScanStatusCanceled), "rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"}
+			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var13...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if scan.ErrorMessage != "" {
-				var templ_7745c5c3_Var13 string
-				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(scan.ErrorMessage)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 65, Col: 27}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else if scan.Status == scans.ScanStatusCanceled {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "Canceled by user")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "Unexpected failure while processing scan.")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</p></div><div class=\"mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-8 sm:flex-row\"><div class=\"flex items-center gap-2 text-slate-400\"><span class=\"material-symbols-outlined text-lg\">info</span> <span class=\"text-xs italic font-medium\">Our engine is auditing your content for accessibility standards...</span></div><form action=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div id=\"error-panel\" class=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var14 templ.SafeURL
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs("/scans/" + scan.ID + "/cancel")
+			var templ_7745c5c3_Var14 string
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var13).String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 79, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 1, Col: 0}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" method=\"post\"><button id=\"cancel-scan-button\" class=\"w-full rounded-lg border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 sm:w-auto\" type=\"submit\">Cancel Scan</button></form></div></div></main></div><style>\n\t\t\t@keyframes shimmer {\n\t\t\t\t100% {\n\t\t\t\t\ttransform: translateX(100%);\n\t\t\t\t}\n\t\t\t}\n\t\t</style> <script>\n\t\t\t(function () {\n\t\t\t\tconst root = document.getElementById(\"scan-progress-page\");\n\t\t\t\tif (!root) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tconst scanId = root.dataset.scanId;\n\t\t\t\tconst reportURL = root.dataset.reportUrl;\n\t\t\t\tconst progressFill = document.getElementById(\"progress-fill\");\n\t\t\t\tconst progressLabel = document.getElementById(\"progress-label\");\n\t\t\t\tconst stageLabel = document.getElementById(\"stage-label\");\n\t\t\t\tconst etaSeconds = document.getElementById(\"eta-seconds\");\n\t\t\t\tconst activityIcon = document.getElementById(\"activity-icon\");\n\t\t\t\tconst errorPanel = document.getElementById(\"error-panel\");\n\t\t\t\tconst errorTitle = document.getElementById(\"error-title\");\n\t\t\t\tconst errorMessage = document.getElementById(\"error-message\");\n\t\t\t\tconst cancelScanButton = document.getElementById(\"cancel-scan-button\");\n\n\t\t\t\tasync function refresh() {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst response = await fetch(\"/api/v1/scans/\" + scanId + \"/status\", { headers: { Accept: \"application/json\" } });\n\t\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\t\tsetTimeout(refresh, 1500);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\t\tif (progressFill) {\n\t\t\t\t\t\t\tprogressFill.style.width = data.progress + \"%\";\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (progressLabel) {\n\t\t\t\t\t\t\tprogressLabel.textContent = data.status === \"completed\" ? \"Complete\" : data.status === \"failed\" ? \"Failed\" : data.progress + \"% Complete\";\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (stageLabel) {\n\t\t\t\t\t\t\tstageLabel.textContent = data.stage || \"Processing\";\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (etaSeconds) {\n\t\t\t\t\t\t\tetaSeconds.textContent = data.estimatedSeconds + \"s\";\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (data.status === \"completed\") {\n\t\t\t\t\t\t\twindow.location.href = reportURL;\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (data.status === \"failed\" || data.status === \"canceled\") {\n\t\t\t\t\t\t\tif (activityIcon) {\n\t\t\t\t\t\t\t\tactivityIcon.classList.remove(\"animate-spin\");\n\t\t\t\t\t\t\t\tactivityIcon.textContent = data.status === \"failed\" ? \"error\" : \"block\";\n\t\t\t\t\t\t\t\tactivityIcon.classList.remove(\"text-[#137fec]\");\n\t\t\t\t\t\t\t\tactivityIcon.classList.add(data.status === \"failed\" ? \"text-red-500\" : \"text-slate-500\");\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tif (errorPanel) {\n\t\t\t\t\t\t\t\terrorPanel.classList.remove(\"hidden\");\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tif (errorTitle) {\n\t\t\t\t\t\t\t\terrorTitle.textContent = data.status === \"failed\" ? \"Scan failed\" : \"Scan canceled\";\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tif (errorMessage) {\n\t\t\t\t\t\t\t\terrorMessage.textContent = data.errorMessage && data.errorMessage.trim() !== \"\"\n\t\t\t\t\t\t\t\t\t? data.errorMessage\n\t\t\t\t\t\t\t\t\t: data.status === \"failed\"\n\t\t\t\t\t\t\t\t\t\t? \"Unexpected failure while processing scan.\"\n\t\t\t\t\t\t\t\t\t\t: \"Canceled by user\";\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tif (cancelScanButton) {\n\t\t\t\t\t\t\t\tcancelScanButton.disabled = true;\n\t\t\t\t\t\t\t\tcancelScanButton.classList.add(\"opacity-60\", \"cursor-not-allowed\");\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t} catch (_) {\n\t\t\t\t\t\t// Retry loop intentionally ignores transient fetch failures.\n\t\t\t\t\t}\n\n\t\t\t\t\tsetTimeout(refresh, 1500);\n\t\t\t\t}\n\n\t\t\t\tsetTimeout(refresh, 1000);\n\t\t\t})();\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><p id=\"error-title\" class=\"font-semibold\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if scan.Status == scans.ScanStatusCanceled {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "Scan canceled")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "Scan failed")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</p><p id=\"error-message\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if scan.ErrorMessage != "" {
+				var templ_7745c5c3_Var15 string
+				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(scan.ErrorMessage)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 77, Col: 27}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else if scan.Status == scans.ScanStatusCanceled {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "Canceled by user")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "Unexpected failure while processing scan.")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</p></div><div class=\"mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-8 sm:flex-row\"><div class=\"flex items-center gap-2 text-slate-400\"><span class=\"material-symbols-outlined text-lg\">info</span> <span class=\"text-xs italic font-medium\">Our engine is auditing your content for accessibility standards...</span></div><form action=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var16 templ.SafeURL
+			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs("/scans/" + scan.ID + "/cancel")
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/scan_progress.templ`, Line: 91, Col: 52}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" method=\"post\"><button id=\"cancel-scan-button\" class=\"w-full rounded-lg border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 sm:w-auto\" type=\"submit\">Cancel Scan</button></form></div></div></main></div><style>\n\t\t\t@keyframes shimmer {\n\t\t\t\t100% {\n\t\t\t\t\ttransform: translateX(100%);\n\t\t\t\t}\n\t\t\t}\n\t\t</style> <script>\n\t\t\t(function () {\n\t\t\t\tconst root = document.getElementById(\"scan-progress-page\");\n\t\t\t\tif (!root) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tconst scanId = root.dataset.scanId;\n\t\t\t\tconst reportURL = root.dataset.reportUrl;\n\t\t\t\tconst progressFill = document.getElementById(\"progress-fill\");\n\t\t\t\tconst progressLabel = document.getElementById(\"progress-label\");\n\t\t\t\tconst stageLabel = document.getElementById(\"stage-label\");\n\t\t\t\tconst etaSeconds = document.getElementById(\"eta-seconds\");\n\t\t\t\tconst activityIcon = document.getElementById(\"activity-icon\");\n\t\t\t\tconst errorPanel = document.getElementById(\"error-panel\");\n\t\t\t\tconst errorTitle = document.getElementById(\"error-title\");\n\t\t\t\tconst errorMessage = document.getElementById(\"error-message\");\n\t\t\t\tconst cancelScanButton = document.getElementById(\"cancel-scan-button\");\n\n\t\t\t\tasync function refresh() {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst response = await fetch(\"/api/v1/scans/\" + scanId + \"/status\", { headers: { Accept: \"application/json\" } });\n\t\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\t\tsetTimeout(refresh, 1500);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\t\tif (progressFill) {\n\t\t\t\t\t\t\tprogressFill.style.width = data.progress + \"%\";\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (progressLabel) {\n\t\t\t\t\t\t\tprogressLabel.textContent = data.status === \"completed\" ? \"Complete\" : data.status === \"failed\" ? \"Failed\" : data.progress + \"% Complete\";\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (stageLabel) {\n\t\t\t\t\t\t\tstageLabel.textContent = data.stage || \"Processing\";\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (etaSeconds) {\n\t\t\t\t\t\t\tetaSeconds.textContent = data.estimatedSeconds + \"s\";\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (data.status === \"completed\") {\n\t\t\t\t\t\t\twindow.location.href = reportURL;\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (data.status === \"failed\" || data.status === \"canceled\") {\n\t\t\t\t\t\t\tif (activityIcon) {\n\t\t\t\t\t\t\t\tactivityIcon.classList.remove(\"animate-spin\");\n\t\t\t\t\t\t\t\tactivityIcon.textContent = data.status === \"failed\" ? \"error\" : \"block\";\n\t\t\t\t\t\t\t\tactivityIcon.classList.remove(\"text-[#137fec]\");\n\t\t\t\t\t\t\t\tactivityIcon.classList.add(data.status === \"failed\" ? \"text-red-500\" : \"text-slate-500\");\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tif (errorPanel) {\n\t\t\t\t\t\t\t\terrorPanel.classList.remove(\"hidden\");\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tif (errorTitle) {\n\t\t\t\t\t\t\t\terrorTitle.textContent = data.status === \"failed\" ? \"Scan failed\" : \"Scan canceled\";\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tif (errorMessage) {\n\t\t\t\t\t\t\t\terrorMessage.textContent = data.errorMessage && data.errorMessage.trim() !== \"\"\n\t\t\t\t\t\t\t\t\t? data.errorMessage\n\t\t\t\t\t\t\t\t\t: data.status === \"failed\"\n\t\t\t\t\t\t\t\t\t\t? \"Unexpected failure while processing scan.\"\n\t\t\t\t\t\t\t\t\t\t: \"Canceled by user\";\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tif (cancelScanButton) {\n\t\t\t\t\t\t\t\tcancelScanButton.disabled = true;\n\t\t\t\t\t\t\t\tcancelScanButton.classList.add(\"opacity-60\", \"cursor-not-allowed\");\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t} catch (_) {\n\t\t\t\t\t\t// Retry loop intentionally ignores transient fetch failures.\n\t\t\t\t\t}\n\n\t\t\t\t\tsetTimeout(refresh, 1500);\n\t\t\t\t}\n\n\t\t\t\tsetTimeout(refresh, 1000);\n\t\t\t})();\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -1,6 +1,8 @@
 services:
   ba11y:
-    image: briannunez/ba11y:v1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
     ports:
       - "8090:8090"
@@ -11,14 +13,13 @@ services:
       SCAN_WORKER_LOG_PATH: "/data/logs"
       SCAN_WORKER_CONCURRENCY: "3"
       BBAAS_BASE_URL: "https://bbaas.b8z.me"
-      BBAAS_API_TOKEN: "replace-with-your-bbaas-api-token"
+      BBAAS_API_TOKEN: ""
       BBAAS_API_KEY: ""
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      BTICK_BASE_URL: ""
+      BTICK_API_KEY: ""
+      BTICK_API_TOKEN: ""
+      BTICK_WEBHOOK_URL: ""
+      BTICK_WEBHOOK_SECRET: ""
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "true"
     volumes:
       - ./data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/api/v1/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 20s

@@ -64,6 +64,10 @@ func Bootstrap(bootstrapConfig BootstrapConfig) Server {
 	scanService, err := scans.NewService(scans.Config{
 		BBAASBaseURL:       appConfig.BBAASBaseURL,
 		BBAASAPIToken:      appConfig.BBAASAPIToken,
+		BTickBaseURL:       appConfig.BTickBaseURL,
+		BTickAPIKey:        appConfig.BTickAPIKey,
+		BTickWebhookURL:    appConfig.BTickWebhookURL,
+		BTickWebhookSecret: appConfig.BTickWebhookSecret,
 		WorkerConcurrency:  appConfig.WorkerConcurrency,
 		WorkerLogPath:      appConfig.WorkerLogPath,
 		WorkerDatabasePath: appConfig.WorkerDatabasePath,
