@@ -112,6 +112,7 @@ type Scan struct {
 	ID                    string
 	OwnerUserID           string
 	RequestedByEmail      string
+	RecurringScanID       string
 	Type                  ScanType
 	Target                string
 	Standard              string
@@ -169,6 +170,7 @@ type RecurringScan struct {
 type CreateScanInput struct {
 	OwnerUserID           string
 	OwnerEmail            string
+	RecurringScanID       string
 	Type                  ScanType
 	Target                string
 	Standard              string
@@ -184,6 +186,17 @@ type CreateRecurringScanInput struct {
 	OwnerEmail           string
 	Type                 ScanType
 	Target               string
+	Standard             string
+	IncludeBestPractices bool
+	Frequency            RecurringFrequency
+	Timezone             string
+	Minute               int
+	HourOfDay            int
+	DayOfWeek            int
+	DayOfMonth           int
+}
+
+type UpdateRecurringScanInput struct {
 	Standard             string
 	IncludeBestPractices bool
 	Frequency            RecurringFrequency

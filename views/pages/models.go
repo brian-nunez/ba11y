@@ -268,3 +268,10 @@ func RecurringScheduleLabel(recurring scans.RecurringScan) string {
 		return recurring.CronExpression
 	}
 }
+
+func RecurringFormAction(scanID string, editingRecurringID string) string {
+	if strings.TrimSpace(editingRecurringID) != "" {
+		return "/scans/recurring/" + editingRecurringID + "/update"
+	}
+	return "/scans/" + scanID + "/recurring"
+}

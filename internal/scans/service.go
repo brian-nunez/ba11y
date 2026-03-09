@@ -188,6 +188,7 @@ func (s *Service) CreateScan(ctx context.Context, actor auth.User, input CreateS
 		ID:                    scanID,
 		OwnerUserID:           input.OwnerUserID,
 		RequestedByEmail:      input.OwnerEmail,
+		RecurringScanID:       strings.TrimSpace(input.RecurringScanID),
 		Type:                  input.Type,
 		Target:                strings.TrimSpace(input.Target),
 		Standard:              standard,
@@ -510,6 +511,7 @@ func (s *Service) ensureSchema(ctx context.Context) error {
 			id TEXT PRIMARY KEY,
 			owner_user_id TEXT NOT NULL,
 			requested_by_email TEXT NOT NULL,
+			recurring_scan_id TEXT NOT NULL DEFAULT '',
 			type TEXT NOT NULL,
 			target TEXT NOT NULL,
 			standard TEXT NOT NULL,
@@ -604,6 +606,9 @@ func (s *Service) ensureSchema(ctx context.Context) error {
 	if err := s.ensureScansColumn(ctx, "include_best_practices", "INTEGER NOT NULL DEFAULT 0"); err != nil {
 		return err
 	}
+	if err := s.ensureScansColumn(ctx, "recurring_scan_id", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return err
+	}
 	if err := s.ensureScansColumn(ctx, "axe_raw_json", "TEXT NOT NULL DEFAULT ''"); err != nil {
 		return err
 	}
@@ -656,6 +661,7 @@ func (s *Service) loadScans(ctx context.Context) error {
 			id,
 			owner_user_id,
 			requested_by_email,
+			recurring_scan_id,
 			type,
 			target,
 			standard,
@@ -709,6 +715,7 @@ func (s *Service) loadScans(ctx context.Context) error {
 			&scan.ID,
 			&scan.OwnerUserID,
 			&scan.RequestedByEmail,
+			&scan.RecurringScanID,
 			&scan.Type,
 			&scan.Target,
 			&scan.Standard,
@@ -860,6 +867,7 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 			id,
 			owner_user_id,
 			requested_by_email,
+			recurring_scan_id,
 			type,
 			target,
 			standard,
@@ -887,10 +895,11 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 			evidence_tablet_image_url,
 			evidence_mobile_image_url,
 			evidence_recording_image_url
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			owner_user_id = excluded.owner_user_id,
 			requested_by_email = excluded.requested_by_email,
+			recurring_scan_id = excluded.recurring_scan_id,
 			type = excluded.type,
 			target = excluded.target,
 			standard = excluded.standard,
@@ -922,6 +931,7 @@ func (s *Service) persistScanLocked(scan *Scan) error {
 		scan.ID,
 		scan.OwnerUserID,
 		scan.RequestedByEmail,
+		scan.RecurringScanID,
 		string(scan.Type),
 		scan.Target,
 		scan.Standard,

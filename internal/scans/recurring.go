@@ -84,19 +84,11 @@ func (s *Service) CreateRecurringScan(ctx context.Context, actor auth.User, inpu
 	}
 
 	job, err := s.btick.CreateJob(ctx, btick.CreateJobRequest{
-		Name:    fmt.Sprintf("ba11y recurring scan %s", recurring.ID),
-		Method:  "POST",
-		URL:     s.btickWebhookURL,
-		Headers: headers,
-		Body: map[string]any{
-			"recurring_scan_id":      recurring.ID,
-			"owner_user_id":          recurring.OwnerUserID,
-			"owner_email":            recurring.RequestedByEmail,
-			"target":                 recurring.Target,
-			"scan_type":              recurring.Type,
-			"standard":               recurring.Standard,
-			"include_best_practices": recurring.IncludeBestPractices,
-		},
+		Name:           fmt.Sprintf("ba11y recurring scan %s", recurring.ID),
+		Method:         "POST",
+		URL:            s.btickWebhookURL,
+		Headers:        headers,
+		Body:           recurringJobBody(*recurring),
 		CronExpression: recurring.CronExpression,
 		Timezone:       recurring.Timezone,
 		RetryMax:       1,
@@ -176,6 +168,23 @@ func (s *Service) ListRecurringScansForScan(ctx context.Context, actor auth.User
 	return out, nil
 }
 
+func (s *Service) GetRecurringScanForUser(_ context.Context, actor auth.User, recurringScanID string) (RecurringScan, error) {
+	s.mu.RLock()
+	recurring := s.recurringByID[strings.TrimSpace(recurringScanID)]
+	s.mu.RUnlock()
+
+	if recurring == nil {
+		return RecurringScan{}, ErrRecurringScanNotFound
+	}
+
+	resource := authorization.ScanResource{OwnerUserID: recurring.OwnerUserID}
+	if !s.authorizer.Can(actor, resource, "scans.read") {
+		return RecurringScan{}, ErrForbidden
+	}
+
+	return s.cloneRecurringScan(recurring), nil
+}
+
 func (s *Service) EnableRecurringScan(ctx context.Context, actor auth.User, recurringScanID string) (RecurringScan, error) {
 	return s.changeRecurringState(ctx, actor, recurringScanID, RecurringScanStateEnabled)
 }
@@ -186,6 +195,140 @@ func (s *Service) DisableRecurringScan(ctx context.Context, actor auth.User, rec
 
 func (s *Service) StopRecurringScan(ctx context.Context, actor auth.User, recurringScanID string) (RecurringScan, error) {
 	return s.changeRecurringState(ctx, actor, recurringScanID, RecurringScanStateStopped)
+}
+
+func (s *Service) UpdateRecurringScan(ctx context.Context, actor auth.User, recurringScanID string, input UpdateRecurringScanInput) (RecurringScan, error) {
+	s.mu.RLock()
+	current := s.recurringByID[recurringScanID]
+	if current == nil {
+		s.mu.RUnlock()
+		return RecurringScan{}, ErrRecurringScanNotFound
+	}
+	recurring := s.cloneRecurringScan(current)
+	s.mu.RUnlock()
+
+	resource := authorization.ScanResource{OwnerUserID: recurring.OwnerUserID}
+	if !s.authorizer.Can(actor, resource, "scans.cancel") {
+		return RecurringScan{}, ErrForbidden
+	}
+	if recurring.State == RecurringScanStateStopped {
+		return RecurringScan{}, fmt.Errorf("%w: recurring scan has been stopped", ErrInvalidRecurringSchedule)
+	}
+	if err := s.requireBTickWriteConfig(false); err != nil {
+		return RecurringScan{}, err
+	}
+
+	schedule, err := normalizeRecurringSchedule(CreateRecurringScanInput{
+		Frequency:  input.Frequency,
+		Timezone:   input.Timezone,
+		Minute:     input.Minute,
+		HourOfDay:  input.HourOfDay,
+		DayOfWeek:  input.DayOfWeek,
+		DayOfMonth: input.DayOfMonth,
+	})
+	if err != nil {
+		return RecurringScan{}, err
+	}
+
+	standard := strings.TrimSpace(input.Standard)
+	if standard == "" {
+		standard = recurring.Standard
+	}
+
+	enabled := recurring.State == RecurringScanStateEnabled
+
+	updateRequest := btick.UpdateJobRequest{
+		Body:           recurringJobBody(RecurringScan{ID: recurring.ID, OwnerUserID: recurring.OwnerUserID, RequestedByEmail: recurring.RequestedByEmail, Target: recurring.Target, Type: recurring.Type, Standard: standard, IncludeBestPractices: input.IncludeBestPractices}),
+		CronExpression: &schedule.CronExpression,
+		Timezone:       &schedule.Timezone,
+		Enabled:        &enabled,
+	}
+	if strings.TrimSpace(s.btickWebhookURL) != "" {
+		jobName := fmt.Sprintf("ba11y recurring scan %s", recurring.ID)
+		method := "POST"
+		webhookURL := s.btickWebhookURL
+		headers := map[string]string{
+			"Content-Type": "application/json",
+		}
+		if s.btickWebhookSecret != "" {
+			headers[recurringWebhookSecretHeader] = s.btickWebhookSecret
+		}
+		updateRequest.Name = &jobName
+		updateRequest.Method = &method
+		updateRequest.URL = &webhookURL
+		updateRequest.Headers = &headers
+	}
+
+	_, err = s.btick.UpdateJob(ctx, recurring.BTickJobID, updateRequest)
+	if err != nil {
+		return RecurringScan{}, fmt.Errorf("update btick job: %w", err)
+	}
+
+	now := s.now().UTC()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	stored := s.recurringByID[recurringScanID]
+	if stored == nil {
+		return RecurringScan{}, ErrRecurringScanNotFound
+	}
+
+	stored.Standard = standard
+	stored.IncludeBestPractices = input.IncludeBestPractices
+	stored.Frequency = schedule.Frequency
+	stored.CronExpression = schedule.CronExpression
+	stored.Timezone = schedule.Timezone
+	stored.Minute = schedule.Minute
+	stored.HourOfDay = schedule.HourOfDay
+	stored.DayOfWeek = schedule.DayOfWeek
+	stored.DayOfMonth = schedule.DayOfMonth
+	stored.UpdatedAt = now
+
+	if err := s.persistRecurringScanLocked(stored); err != nil {
+		return RecurringScan{}, fmt.Errorf("persist recurring update: %w", err)
+	}
+
+	return s.cloneRecurringScan(stored), nil
+}
+
+func (s *Service) ListRecurringTriggeredScansForScan(ctx context.Context, actor auth.User, scanID string) ([]Scan, error) {
+	scan, err := s.GetScanForUser(ctx, actor, scanID)
+	if err != nil {
+		return nil, err
+	}
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	recurringIDs := make(map[string]struct{})
+	for _, recurringID := range s.orderedRecurringIDs {
+		recurring := s.recurringByID[recurringID]
+		if recurring == nil {
+			continue
+		}
+		if recurring.SourceScanID != scan.ID {
+			continue
+		}
+		if actor.IsAdmin() || recurring.OwnerUserID == actor.ID {
+			recurringIDs[recurring.ID] = struct{}{}
+		}
+	}
+
+	out := make([]Scan, 0)
+	for _, scanID := range s.orderedScanIDs {
+		candidate := s.scansByID[scanID]
+		if candidate == nil {
+			continue
+		}
+		if _, ok := recurringIDs[candidate.RecurringScanID]; !ok {
+			continue
+		}
+		if actor.IsAdmin() || candidate.OwnerUserID == actor.ID {
+			out = append(out, s.cloneScan(candidate))
+		}
+	}
+
+	return out, nil
 }
 
 func (s *Service) TriggerRecurringScanFromWebhook(ctx context.Context, payload RecurringWebhookPayload, providedSecret string) (Scan, error) {
@@ -222,6 +365,7 @@ func (s *Service) TriggerRecurringScanFromWebhook(ctx context.Context, payload R
 	createdScan, err := s.CreateScan(ctx, actor, CreateScanInput{
 		OwnerUserID:          recurringCopy.OwnerUserID,
 		OwnerEmail:           recurringCopy.RequestedByEmail,
+		RecurringScanID:      recurringCopy.ID,
 		Type:                 recurringCopy.Type,
 		Target:               recurringCopy.Target,
 		Standard:             recurringCopy.Standard,
@@ -243,6 +387,18 @@ func (s *Service) TriggerRecurringScanFromWebhook(ctx context.Context, payload R
 	s.mu.Unlock()
 
 	return createdScan, nil
+}
+
+func recurringJobBody(recurring RecurringScan) map[string]any {
+	return map[string]any{
+		"recurring_scan_id":      recurring.ID,
+		"owner_user_id":          recurring.OwnerUserID,
+		"owner_email":            recurring.RequestedByEmail,
+		"target":                 recurring.Target,
+		"scan_type":              recurring.Type,
+		"standard":               recurring.Standard,
+		"include_best_practices": recurring.IncludeBestPractices,
+	}
 }
 
 func (s *Service) loadRecurringScans(ctx context.Context) error {

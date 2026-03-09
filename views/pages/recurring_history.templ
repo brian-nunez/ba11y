@@ -1,0 +1,97 @@
+package pages
+
+import (
+	"fmt"
+
+	"github.com/brian-nunez/ba11y/internal/auth"
+	"github.com/brian-nunez/ba11y/internal/scans"
+)
+
+templ RecurringHistoryPage(session SessionView, currentUser auth.User, recurringScans []scans.RecurringScan, successMessage string, errorMessage string) {
+	@Layout("A11y Scanner - Recurring Scans") {
+		<div class="min-h-screen">
+			@AppHeader(session)
+			<main class="mx-auto w-full max-w-7xl px-4 py-8 md:px-8">
+				<div class="mb-6 flex flex-col gap-2">
+					<h1 class="text-3xl font-bold">Recurring Scans</h1>
+					<p class="text-sm text-slate-500">All recurring schedules for { currentUser.Email }.</p>
+				</div>
+
+				if successMessage != "" {
+					<div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{ successMessage }</div>
+				}
+				if errorMessage != "" {
+					<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{ errorMessage }</div>
+				}
+
+				<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+					<table class="w-full border-collapse text-left">
+						<thead>
+							<tr class="border-b border-slate-200 bg-slate-50">
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Target</th>
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Schedule</th>
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">WCAG</th>
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Status</th>
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Last Trigger</th>
+								<th class="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Actions</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-slate-100">
+							if len(recurringScans) == 0 {
+								<tr>
+									<td class="px-5 py-8 text-sm text-slate-500" colspan="6">No recurring schedules yet. Create one from a scan report.</td>
+								</tr>
+							}
+							for _, recurring := range recurringScans {
+								<tr class="hover:bg-slate-50/60">
+									<td class="px-5 py-4">
+										<p class="font-semibold text-slate-800">{ recurring.Target }</p>
+										<p class="text-xs text-slate-500">#{ recurring.ID }</p>
+									</td>
+									<td class="px-5 py-4">
+										<p class="text-sm font-semibold text-slate-700">{ RecurringScheduleLabel(recurring) }</p>
+										<p class="text-xs text-slate-500">{ RecurringFrequencyLabel(recurring.Frequency) } · { recurring.Timezone }</p>
+									</td>
+									<td class="px-5 py-4 text-sm text-slate-700">{ recurring.Standard }</td>
+									<td class="px-5 py-4">
+										<span class={ RecurringStateClass(recurring.State) }>{ RecurringStateLabel(recurring.State) }</span>
+									</td>
+									<td class="px-5 py-4 text-sm text-slate-600">{ FormattedOptionalScanTime(recurring.LastTriggeredAt) }</td>
+									<td class="px-5 py-4">
+										<div class="flex flex-wrap gap-2">
+											if recurring.SourceScanID != "" {
+												<a href={ "/scans/" + recurring.SourceScanID + "/recurring?edit=" + recurring.ID } class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Manage</a>
+											}
+											if recurring.State == scans.RecurringScanStateEnabled {
+												<form method="post" action={ "/scans/recurring/" + recurring.ID + "/disable" }>
+													<input type="hidden" name="return_to" value="/scans/recurring"/>
+													<button type="submit" class="rounded-md border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50">Disable</button>
+												</form>
+											}
+											if recurring.State == scans.RecurringScanStateDisabled {
+												<form method="post" action={ "/scans/recurring/" + recurring.ID + "/enable" }>
+													<input type="hidden" name="return_to" value="/scans/recurring"/>
+													<button type="submit" class="rounded-md border border-emerald-300 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">Enable</button>
+												</form>
+											}
+											if recurring.State != scans.RecurringScanStateStopped {
+												<form method="post" action={ "/scans/recurring/" + recurring.ID + "/stop" }>
+													<input type="hidden" name="return_to" value="/scans/recurring"/>
+													<button type="submit" class="rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50">Stop</button>
+												</form>
+											}
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+
+				if len(recurringScans) > 0 {
+					<div class="mt-4 text-sm text-slate-500">Total schedules: { fmt.Sprint(len(recurringScans)) }</div>
+				}
+			</main>
+		</div>
+	}
+}

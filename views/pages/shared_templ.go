@@ -29,7 +29,7 @@ func AppHeader(session SessionView) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"flex items-center justify-between whitespace-nowrap border-b border-slate-200 bg-white px-6 py-3 md:px-10\"><div class=\"flex items-center gap-4\"><a href=\"/\" class=\"text-[#137fec] size-8 flex items-center justify-center\"><span class=\"material-symbols-outlined text-3xl\">accessibility</span></a><h2 class=\"text-lg font-bold tracking-tight\">A11y Scanner</h2><nav class=\"hidden md:flex items-center gap-5 ml-6\"><a class=\"text-sm font-medium text-slate-500 hover:text-[#137fec]\" href=\"/scans/new\">New Scan</a> <a class=\"text-sm font-medium text-slate-500 hover:text-[#137fec]\" href=\"/scans\">Reports</a></nav></div><div class=\"flex gap-2 items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"flex items-center justify-between whitespace-nowrap border-b border-slate-200 bg-white px-6 py-3 md:px-10\"><div class=\"flex items-center gap-4\"><a href=\"/\" class=\"text-[#137fec] size-8 flex items-center justify-center\"><span class=\"material-symbols-outlined text-3xl\">accessibility</span></a><h2 class=\"text-lg font-bold tracking-tight\">A11y Scanner</h2><nav class=\"hidden md:flex items-center gap-5 ml-6\"><a class=\"text-sm font-medium text-slate-500 hover:text-[#137fec]\" href=\"/scans/new\">New Scan</a> <a class=\"text-sm font-medium text-slate-500 hover:text-[#137fec]\" href=\"/scans\">Reports</a> <a class=\"text-sm font-medium text-slate-500 hover:text-[#137fec]\" href=\"/scans/recurring\">Recurring</a></nav></div><div class=\"flex gap-2 items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -41,7 +41,7 @@ func AppHeader(session SessionView) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(session.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/shared.templ`, Line: 19, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/shared.templ`, Line: 20, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {

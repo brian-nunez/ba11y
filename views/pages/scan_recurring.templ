@@ -1,0 +1,359 @@
+package pages
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/brian-nunez/ba11y/internal/auth"
+	"github.com/brian-nunez/ba11y/internal/scans"
+)
+
+templ ScanRecurringPage(session SessionView, currentUser auth.User, scan scans.Scan, recurringScans []scans.RecurringScan, recurringRuns []scans.Scan, form RecurringFormView, editingRecurringID string, successMessage string, errorMessage string) {
+	@Layout("A11y Scanner - Recurring Schedules") {
+		<div class="relative flex min-h-screen w-full flex-col">
+			<div class="layout-container flex h-full grow flex-col">
+				@AppHeader(session)
+				<main class="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 md:px-8">
+					<div class="mb-6 flex items-center gap-2 text-sm text-slate-500">
+						<a class="hover:text-[#137fec]" href="/scans">Projects</a>
+						<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+						<a class="hover:text-[#137fec]" href={ "/scans/" + scan.ID + "/report" }>Scan Results</a>
+						<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+						<span class="font-medium text-slate-900">Recurring Automation</span>
+					</div>
+
+					<div class="mb-6 flex flex-col gap-2">
+						<h1 class="text-2xl font-black text-slate-900">Recurring Automation for Scan #{ scan.ID }</h1>
+						<p class="text-sm text-slate-600">Configure schedules for { scan.Target } and monitor recurring run history.</p>
+					</div>
+
+					if successMessage != "" {
+						<div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{ successMessage }</div>
+					}
+					if errorMessage != "" {
+						<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{ errorMessage }</div>
+					}
+
+					<section class="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+						<div class="mb-5 flex items-center justify-between gap-4">
+							<div>
+								if editingRecurringID != "" {
+									<h2 class="text-lg font-bold text-slate-900">Edit Recurring Schedule</h2>
+									<p class="mt-1 text-sm text-slate-500">Updating keeps the existing btick job and historical data.</p>
+								} else {
+									<h2 class="text-lg font-bold text-slate-900">Create Recurring Schedule</h2>
+									<p class="mt-1 text-sm text-slate-500">New schedules use this scan as the source configuration.</p>
+								}
+							</div>
+							if editingRecurringID != "" {
+								<a href={ "/scans/" + scan.ID + "/recurring" } class="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Cancel Edit</a>
+							}
+						</div>
+
+						<form id="recurring-schedule-form" method="post" action={ RecurringFormAction(scan.ID, editingRecurringID) } class="space-y-5">
+							<input type="hidden" name="return_to" value={ "/scans/" + scan.ID + "/recurring" }/>
+
+							<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+								<div class="flex flex-col gap-2">
+									<label class="text-sm font-medium text-slate-700">WCAG Standard</label>
+									<select name="standard" class="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20">
+										for _, standard := range StandardOptions() {
+											<option value={ standard } selected?={ standard == form.Standard }>{ standard }</option>
+										}
+									</select>
+								</div>
+								<div class="flex items-end">
+									<label class="group flex cursor-pointer items-center gap-3 pb-1">
+										<input type="checkbox" name="include_best_practices" class="h-5 w-5 rounded border-slate-300 text-[#137fec] focus:ring-[#137fec]" checked?={ form.IncludeBestPractices }/>
+										<span class="text-sm text-slate-600 group-hover:text-slate-900">Include best-practice rules</span>
+									</label>
+								</div>
+							</div>
+
+							<div class="space-y-2">
+								<label class="text-sm font-medium text-slate-700">Frequency</label>
+								<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+									<label class="cursor-pointer">
+										<input type="radio" name="frequency" value="hourly" checked?={ form.Frequency == string(scans.RecurringFrequencyHourly) } class="peer sr-only"/>
+										<span class="block rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-[#137fec]/50 peer-checked:border-[#137fec] peer-checked:bg-[#137fec]/5 peer-checked:text-[#137fec]">Hourly</span>
+									</label>
+									<label class="cursor-pointer">
+										<input type="radio" name="frequency" value="daily" checked?={ form.Frequency == string(scans.RecurringFrequencyDaily) } class="peer sr-only"/>
+										<span class="block rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-[#137fec]/50 peer-checked:border-[#137fec] peer-checked:bg-[#137fec]/5 peer-checked:text-[#137fec]">Daily</span>
+									</label>
+									<label class="cursor-pointer">
+										<input type="radio" name="frequency" value="weekly" checked?={ form.Frequency == string(scans.RecurringFrequencyWeekly) } class="peer sr-only"/>
+										<span class="block rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-[#137fec]/50 peer-checked:border-[#137fec] peer-checked:bg-[#137fec]/5 peer-checked:text-[#137fec]">Weekly</span>
+									</label>
+									<label class="cursor-pointer">
+										<input type="radio" name="frequency" value="monthly" checked?={ form.Frequency == string(scans.RecurringFrequencyMonthly) } class="peer sr-only"/>
+										<span class="block rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-[#137fec]/50 peer-checked:border-[#137fec] peer-checked:bg-[#137fec]/5 peer-checked:text-[#137fec]">Monthly</span>
+									</label>
+								</div>
+							</div>
+
+							<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+								<div class="flex flex-col gap-2">
+									<label class="text-sm font-medium text-slate-700">Timezone</label>
+									<input id="recurring-timezone-input" type="text" name="timezone" value={ form.Timezone } placeholder="America/Phoenix" class="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20"/>
+								</div>
+								<div class="flex flex-col gap-2">
+									<label class="text-sm font-medium text-slate-700">Minute (0-59)</label>
+									<input id="recurring-minute-input" type="number" min="0" max="59" name="minute" value={ strconv.Itoa(form.Minute) } class="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20"/>
+								</div>
+								<div id="recurring-hour-field" class="flex flex-col gap-2">
+									<label class="text-sm font-medium text-slate-700">Hour (0-23)</label>
+									<input id="recurring-hour-input" type="number" min="0" max="23" name="hour_of_day" value={ strconv.Itoa(form.HourOfDay) } class="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20"/>
+								</div>
+								<div id="recurring-weekday-field" class="flex flex-col gap-2">
+									<label class="text-sm font-medium text-slate-700">Weekday</label>
+									<select id="recurring-weekday-input" name="day_of_week" class="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20">
+										for day := 0; day <= 6; day++ {
+											<option value={ strconv.Itoa(day) } selected?={ form.DayOfWeek == day }>{ WeekdayLabel(day) }</option>
+										}
+									</select>
+								</div>
+								<div id="recurring-monthday-field" class="flex flex-col gap-2">
+									<label class="text-sm font-medium text-slate-700">Day of month (1-31)</label>
+									<input id="recurring-monthday-input" type="number" min="1" max="31" name="day_of_month" value={ strconv.Itoa(form.DayOfMonth) } class="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20"/>
+								</div>
+							</div>
+
+							<div class="rounded-lg border border-[#137fec]/20 bg-[#137fec]/5 px-4 py-3">
+								<p class="text-xs font-semibold uppercase tracking-wide text-[#137fec]">Schedule preview</p>
+								<p id="recurring-schedule-preview" class="mt-1 text-sm font-medium text-slate-800">Runs every day at 09:00.</p>
+							</div>
+
+							<div class="flex justify-end">
+								<button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-[#137fec] px-6 py-3 text-sm font-semibold text-white hover:bg-[#0f72d6]">
+									if editingRecurringID != "" {
+										Update Schedule
+									} else {
+										Create Schedule
+									}
+									<span class="material-symbols-outlined text-[18px]">schedule_send</span>
+								</button>
+							</div>
+						</form>
+					</section>
+
+					<section class="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+						<div class="mb-4 flex items-center justify-between">
+							<h2 class="text-lg font-bold text-slate-900">Schedules</h2>
+							<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">User Scoped</span>
+						</div>
+						<div class="overflow-x-auto">
+							<table class="w-full border-collapse text-left">
+								<thead>
+									<tr class="border-b border-slate-200 bg-slate-50">
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Schedule</th>
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">WCAG</th>
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Best Practices</th>
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Status</th>
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Last Trigger</th>
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Actions</th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-slate-100">
+									if len(recurringScans) == 0 {
+										<tr>
+											<td class="px-4 py-8 text-sm text-slate-500" colspan="6">No recurring schedules configured.</td>
+										</tr>
+									}
+									for _, recurring := range recurringScans {
+										<tr class="hover:bg-slate-50/60">
+											<td class="px-4 py-4">
+												<p class="text-sm font-semibold text-slate-800">{ RecurringScheduleLabel(recurring) }</p>
+												<p class="text-xs text-slate-500">{ RecurringFrequencyLabel(recurring.Frequency) } · { recurring.Timezone } · #{ recurring.ID }</p>
+											</td>
+											<td class="px-4 py-4 text-sm text-slate-700">{ recurring.Standard }</td>
+											<td class="px-4 py-4 text-sm text-slate-700">
+												if recurring.IncludeBestPractices {
+													Enabled
+												} else {
+													Disabled
+												}
+											</td>
+											<td class="px-4 py-4">
+												<span class={ RecurringStateClass(recurring.State) }>{ RecurringStateLabel(recurring.State) }</span>
+											</td>
+											<td class="px-4 py-4 text-sm text-slate-600">{ FormattedOptionalScanTime(recurring.LastTriggeredAt) }</td>
+											<td class="px-4 py-4">
+												<div class="flex flex-wrap gap-2">
+													<a href={ "/scans/" + scan.ID + "/recurring?edit=" + recurring.ID } class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Edit</a>
+													if recurring.State == scans.RecurringScanStateEnabled {
+														<form method="post" action={ "/scans/recurring/" + recurring.ID + "/disable" }>
+															<input type="hidden" name="return_to" value={ "/scans/" + scan.ID + "/recurring" }/>
+															<button type="submit" class="rounded-md border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50">Disable</button>
+														</form>
+													}
+													if recurring.State == scans.RecurringScanStateDisabled {
+														<form method="post" action={ "/scans/recurring/" + recurring.ID + "/enable" }>
+															<input type="hidden" name="return_to" value={ "/scans/" + scan.ID + "/recurring" }/>
+															<button type="submit" class="rounded-md border border-emerald-300 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">Enable</button>
+														</form>
+													}
+													if recurring.State != scans.RecurringScanStateStopped {
+														<form method="post" action={ "/scans/recurring/" + recurring.ID + "/stop" }>
+															<input type="hidden" name="return_to" value={ "/scans/" + scan.ID + "/recurring" }/>
+															<button type="submit" class="rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50">Stop</button>
+														</form>
+													}
+												</div>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</section>
+
+					<section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+						<div class="mb-4 flex items-center justify-between">
+							<h2 class="text-lg font-bold text-slate-900">Recurring Scan Results</h2>
+							<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Historical</span>
+						</div>
+						<div class="overflow-x-auto">
+							<table class="w-full border-collapse text-left">
+								<thead>
+									<tr class="border-b border-slate-200 bg-slate-50">
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Scan</th>
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Triggered By</th>
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Status</th>
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Created</th>
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Issues</th>
+										<th class="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">Action</th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-slate-100">
+									if len(recurringRuns) == 0 {
+										<tr>
+											<td class="px-4 py-8 text-sm text-slate-500" colspan="6">No recurring-triggered scan runs yet.</td>
+										</tr>
+									}
+									for _, recurringRun := range recurringRuns {
+										<tr class="hover:bg-slate-50/60">
+											<td class="px-4 py-4">
+												<p class="font-semibold text-slate-800">#{ recurringRun.ID }</p>
+												<p class="text-xs text-slate-500">{ recurringRun.Target }</p>
+											</td>
+											<td class="px-4 py-4 text-sm text-slate-700">#{ recurringRun.RecurringScanID }</td>
+											<td class="px-4 py-4">
+												<span class={ HistoryStatusClass(recurringRun.Status) }>{ string(recurringRun.Status) }</span>
+											</td>
+											<td class="px-4 py-4 text-sm text-slate-700">{ FormattedScanTime(recurringRun.CreatedAt) }</td>
+											<td class="px-4 py-4 text-sm text-slate-700">{ fmt.Sprintf("%d total · %d critical", recurringRun.Summary.Total, recurringRun.Summary.Critical) }</td>
+											<td class="px-4 py-4">
+												if recurringRun.Status == scans.ScanStatusCompleted {
+													<a href={ "/scans/" + recurringRun.ID + "/report" } class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">View Report</a>
+												} else {
+													<a href={ "/scans/" + recurringRun.ID + "/progress" } class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">View Status</a>
+												}
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</section>
+				</main>
+				@AppFooter()
+			</div>
+		</div>
+		<script>
+			(function () {
+				const form = document.getElementById("recurring-schedule-form");
+				const timezoneInput = document.getElementById("recurring-timezone-input");
+				const minuteInput = document.getElementById("recurring-minute-input");
+				const hourInput = document.getElementById("recurring-hour-input");
+				const weekdayInput = document.getElementById("recurring-weekday-input");
+				const monthdayInput = document.getElementById("recurring-monthday-input");
+				const hourField = document.getElementById("recurring-hour-field");
+				const weekdayField = document.getElementById("recurring-weekday-field");
+				const monthdayField = document.getElementById("recurring-monthday-field");
+				const preview = document.getElementById("recurring-schedule-preview");
+				const frequencyInputs = form ? form.querySelectorAll("input[name='frequency']") : [];
+				const weekdayLabels = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+				if (!form || !timezoneInput || !minuteInput || !hourInput || !weekdayInput || !monthdayInput || !hourField || !weekdayField || !monthdayField || !preview) {
+					return;
+				}
+
+				if (timezoneInput.value.trim() === "" || timezoneInput.value.trim() === "UTC") {
+					try {
+						const resolved = Intl.DateTimeFormat().resolvedOptions().timeZone;
+						if (resolved && typeof resolved === "string") {
+							timezoneInput.value = resolved;
+						}
+					} catch (error) {
+						// keep default timezone
+					}
+				}
+
+				function pad(value) {
+					const n = Number.parseInt(value, 10);
+					if (Number.isNaN(n)) {
+						return "00";
+					}
+					return String(Math.max(0, n)).padStart(2, "0");
+				}
+
+				function selectedFrequency() {
+					for (const input of frequencyInputs) {
+						if (input.checked) {
+							return input.value;
+						}
+					}
+					return "daily";
+				}
+
+				function updateVisibility() {
+					const frequency = selectedFrequency();
+					hourField.classList.toggle("hidden", frequency === "hourly");
+					weekdayField.classList.toggle("hidden", frequency !== "weekly");
+					monthdayField.classList.toggle("hidden", frequency !== "monthly");
+				}
+
+				function updatePreview() {
+					const frequency = selectedFrequency();
+					const minute = pad(minuteInput.value);
+					const hour = pad(hourInput.value);
+					const weekdayIndex = Number.parseInt(weekdayInput.value, 10);
+					const weekday = Number.isInteger(weekdayIndex) && weekdayIndex >= 0 && weekdayIndex < weekdayLabels.length ? weekdayLabels[weekdayIndex] : "Monday";
+					const monthday = Number.parseInt(monthdayInput.value, 10);
+					const timezone = timezoneInput.value.trim() || "UTC";
+
+					if (frequency === "hourly") {
+						preview.textContent = `Runs every hour at minute ${minute} (${timezone}).`;
+						return;
+					}
+					if (frequency === "daily") {
+						preview.textContent = `Runs every day at ${hour}:${minute} (${timezone}).`;
+						return;
+					}
+					if (frequency === "weekly") {
+						preview.textContent = `Runs every ${weekday} at ${hour}:${minute} (${timezone}).`;
+						return;
+					}
+					const normalizedMonthday = Number.isInteger(monthday) && monthday >= 1 && monthday <= 31 ? monthday : 1;
+					preview.textContent = `Runs monthly on day ${normalizedMonthday} at ${hour}:${minute} (${timezone}).`;
+				}
+
+				function syncScheduleUX() {
+					updateVisibility();
+					updatePreview();
+				}
+
+				for (const input of frequencyInputs) {
+					input.addEventListener("change", syncScheduleUX);
+				}
+				minuteInput.addEventListener("input", updatePreview);
+				hourInput.addEventListener("input", updatePreview);
+				weekdayInput.addEventListener("change", updatePreview);
+				monthdayInput.addEventListener("input", updatePreview);
+				timezoneInput.addEventListener("input", updatePreview);
+				syncScheduleUX();
+			})();
+		</script>
+	}
+}

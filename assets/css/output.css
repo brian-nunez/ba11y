@@ -928,6 +928,9 @@
   .items-center {
     align-items: center;
   }
+  .items-end {
+    align-items: flex-end;
+  }
   .items-start {
     align-items: flex-start;
   }
@@ -1163,6 +1166,9 @@
   }
   .border-\[\#137fec\]\/20 {
     border-color: color-mix(in oklab, #137fec 20%, transparent);
+  }
+  .border-\[\#137fec\]\/30 {
+    border-color: color-mix(in oklab, #137fec 30%, transparent);
   }
   .border-amber-300 {
     border-color: var(--color-amber-300);
@@ -2401,6 +2407,13 @@
       }
     }
   }
+  .hover\:bg-\[\#137fec\]\/10 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in oklab, #137fec 10%, transparent);
+      }
+    }
+  }
   .hover\:bg-accent {
     &:hover {
       @media (hover: hover) {
@@ -2855,6 +2868,11 @@
   .sm\:flex-row-reverse {
     @media (width >= 40rem) {
       flex-direction: row-reverse;
+    }
+  }
+  .sm\:items-center {
+    @media (width >= 40rem) {
+      align-items: center;
     }
   }
   .sm\:items-end {
